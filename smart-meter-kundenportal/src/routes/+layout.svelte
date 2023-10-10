@@ -2,4 +2,12 @@
 	import '../app.css';
 </script>
 
-<slot><!-- optional fallback --></slot>
+<div>
+	<slot><!-- optional fallback --></slot>
+</div>
+
+<style lang="postcss">
+	div {
+		@apply bg-primary-200 min-h-screen;
+	}
+</style>
