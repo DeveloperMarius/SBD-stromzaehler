@@ -9,3 +9,31 @@ datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id       String @id @default(uuid())
+  email    String @unique
+  name     String
+  password String
+
+  telefon String
+  strasse String
+  hausnr  String
+  plz     String
+  ort     String
+
+  contract Contract[]
+}
+
+model Contract {
+  id         String   @id @default(uuid())
+  name       String
+  startDate  DateTime @default(now())
+  endDate    DateTime
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  powermeter Int      @unique
+
+  preisProKWh     Float
+  powermeterStart Int
+}
