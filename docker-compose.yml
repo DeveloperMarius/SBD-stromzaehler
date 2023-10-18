@@ -1,0 +1,17 @@
+version: '3'
+services:
+  stromzaehler:
+    build: ./smart-meter-stromzaehler
+    ports:
+      - 5001-5010:5000
+    command: /bin/bash -c "{}"
+    deploy:
+      replicas: 10
+    # depends_on:
+    #   - kundenportal
+    networks:
+      stromnetz:
+networks:
+    stromnetz:
+
+# https://stackoverflow.com/questions/56203272/docker-compose-scaling-with-unique-environment-variable
