@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 import os
-from dotenv import load_dotenv
+from dotenv.main import load_dotenv
 from auth_middleware import token_required
 
 load_dotenv()

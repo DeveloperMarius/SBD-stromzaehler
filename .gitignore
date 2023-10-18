@@ -1,4 +1,4 @@
 /.git
 /.idea
-/smart-meter-stromzaehler/.env
-/smart-meter-stromzaehler/__pycache__
+.env
+__pycache__
