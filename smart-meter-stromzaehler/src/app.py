@@ -1,9 +1,9 @@
 from flask import Flask, jsonify, request
 import os
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 from api_routes import api_routes_blueprint
 
-load_dotenv()
+#load_dotenv()
 
 app = Flask(__name__)
 app.register_blueprint(api_routes_blueprint, url_prefix='/api')
@@ -11,8 +11,6 @@ app.register_blueprint(api_routes_blueprint, url_prefix='/api')
 # JWT
 JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
 print(JWT_SECRET_KEY)
-app.config['SECRET_KEY'] = JWT_SECRET_KEY
-
 
 @app.route("/api")
 def hello_world():
