@@ -1,40 +1,27 @@
 from functools import wraps
-import jwt
-from flask import request, abort
-from flask import current_app
-# import models
+from flask import request
+from utils import get_jwt_from_request, is_jwt_in_request
+from variables import get_logger
 
 
 def token_required(f):
+
     @wraps(f)
     def decorated(*args, **kwargs):
-        token = None
-        if "Authorization" in request.headers:
-            token = request.headers["Authorization"].split(" ")[1]
-        if not token:
+        data = get_jwt_from_request(request)
+        if data is None:
+            if is_jwt_in_request(request):
+                get_logger().log(request, "Invalid Authentication Token!")
+            else:
+                get_logger().log(request, "Authentication Token not provided!")
             return {
-                "message": "Authentication Token is missing!",
+                "message": "Invalid Authentication Token!",
                 "data": None,
                 "error": "Unauthorized"
             }, 401
-        try:
-            data=jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])
-            current_user=models.User().get_by_id(data["user_id"])
-            if current_user is None:
-                return {
-                    "message": "Invalid Authentication token!",
-                    "data": None,
-                    "error": "Unauthorized"
-                }, 401
-            if not current_user["active"]:
-                abort(403)
-        except Exception as e:
-            return {
-                "message": "Something went wrong",
-                "data": None,
-                "error": str(e)
-            }, 500
 
-        return f(current_user, *args, **kwargs)
+        get_logger().log(request, 'Successfully authorized!')
+        # return f(current_user, *args, **kwargs)
+        return f(*args, **kwargs)
 
     return decorated
