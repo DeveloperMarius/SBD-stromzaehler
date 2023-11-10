@@ -1,37 +1,41 @@
-from flask import Flask, jsonify, request
+from variables import Variables
+import random
+from utils import get_current_milliseconds
+# import requests
+import jwt
 import os
-#from dotenv import load_dotenv
-from api_routes import api_routes_blueprint
-
-#load_dotenv()
-
-app = Flask(__name__)
-app.register_blueprint(api_routes_blueprint, url_prefix='/api')
-
-# JWT
-JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
-print(JWT_SECRET_KEY)
-
-@app.route("/api")
-def hello_world():
-    return "Hello, World!"
-
-@app.errorhandler(403)
-def forbidden(e):
-    return jsonify({
-        "message": "Forbidden",
-        "error": str(e),
-        "data": None
-    }), 403
-
-@app.errorhandler(404)
-def forbidden(e):
-    return jsonify({
-        "message": "Endpoint Not Found",
-        "error": str(e),
-        "data": None
-    }), 404
+# from dotenv import load_dotenv
 
 
-if __name__ == "__main__":
-    app.run(debug=True)
+class Stromzaehler:
+
+    @staticmethod
+    def simulate_energyusage():
+        Variables.get_database().cursor.execute('SELECT value FROM zaehlerstand ORDER BY timestamp DESC LIMIT 1')
+        last_value = Variables.get_database().cursor.fetchall()
+        usage = random.randint(18, 28)
+
+        if len(last_value) != 0:
+            usage = usage + last_value[0]['value']
+
+        Variables.get_database().cursor.execute('INSERT INTO zaehlerstand ("timestamp", "value") VALUES (?, ?)',
+                                                (get_current_milliseconds(), usage))
+
+    def send_data(self):
+        Variables.get_database().cursor.execute('SELECT * FROM zaehlerstand')
+        readings = Variables.get_database().cursor.fetchall()
+
+        Variables.get_database().cursor.execute('SELECT * FROM logs')
+        logs = Variables.get_database().cursor.fetchall()
+
+        data = {
+            'readings': readings,
+            'logs': logs
+        }
+        jwt_token = jwt.encode(data, os.getenv("JWT_SECRET_KEY"), "HS256")
+
+
+if __name__ == '__main__':
+    # load_dotenv()
+    print(f' jwt: {os.getenv("JWT_SECRET_KEY")}')
+    Stromzaehler.simulate_energyusage()

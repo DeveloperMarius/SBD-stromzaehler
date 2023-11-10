@@ -1,5 +1,6 @@
 import jwt
 import os
+import time
 
 
 def is_jwt_in_request(request):
@@ -16,3 +17,7 @@ def get_jwt_from_request(request):
     except Exception as e:
         print(str(e))
     return None
+
+
+def get_current_milliseconds():
+    return round(time.time() * 1000)

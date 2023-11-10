@@ -1,10 +1,19 @@
 from database import Database
 from logger import Logger
 
-db_instance = Database()
-logger_instance = Logger(db_instance)
 
+class Variables:
+    db_instance = None
+    logger_instance = None
 
-def get_logger():
-    global logger_instance
-    return logger_instance
+    @staticmethod
+    def get_logger():
+        if Variables.logger_instance is None:
+            Variables.logger_instance = Logger(Variables.get_database())
+        return Variables.logger_instance
+
+    @staticmethod
+    def get_database():
+        if Variables.db_instance is None:
+            Variables.db_instance = Database()
+        return Variables.db_instance
