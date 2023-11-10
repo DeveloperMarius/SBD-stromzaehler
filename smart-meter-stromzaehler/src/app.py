@@ -6,6 +6,8 @@ import jwt
 import os
 from dotenv import load_dotenv
 import json
+import hashlib
+import hmac
 
 
 class Stromzaehler:
@@ -30,15 +32,20 @@ class Stromzaehler:
         Variables.get_database().cursor.execute('SELECT * FROM logs')
         logs = Variables.get_database().cursor.fetchall()
 
-        data = json.dumps({
-            'id': os.getenv('STORMZAEHLER_ID'),
+        body = json.dumps({
             'readings': readings,
             'logs': logs
         })
 
-        jwt_token = 'Bearer' + jwt.encode(data, os.getenv("JWT_SECRET_KEY"), "HS256")
+        jwt_data = {
+            'id': os.getenv('STROMZAEHLER_ID'),
+            'mode': "SHA256",
+            'signature': hashlib.sha256(body.encode('utf-8')).hexdigest()
+        }
 
-        response = requests.post('http://localhost:3000', headers={'Authorization': jwt_token}, json=data)
+        jwt_token = 'Bearer' + jwt.encode(jwt_data, os.getenv("JWT_SECRET_KEY"), "HS256")
+        response = requests.post('http://localhost:3000', headers={'Authorization': jwt_token}, data=body)
+
         if response.status_code != 200:
             return
         Variables.get_database().cursor.execute('DELETE FROM readings ORDER BY timestamp DESC LIMIT -1 OFFSET 1')
