@@ -16,7 +16,7 @@ class AppTest(unittest.TestCase):
         current_timestamp = get_current_milliseconds()
 
         # Get results from database
-        Variables.get_database().cursor.execute('SELECT * FROM zaehlerstand')
+        Variables.get_database().cursor.execute('SELECT * FROM readings')
         results_1 = Variables.get_database().cursor.fetchall()
 
         # Checking number of results
@@ -37,12 +37,11 @@ class AppTest(unittest.TestCase):
 
         # Checking second call of function
         Stromzaehler.simulate_energyusage()
-        Variables.get_database().cursor.execute('SELECT * FROM zaehlerstand')
+        Variables.get_database().cursor.execute('SELECT * FROM readings')
         current_timestamp_2 = get_current_milliseconds()
 
-
         # Get results from database
-        Variables.get_database().cursor.execute('SELECT * FROM zaehlerstand ORDER BY timestamp DESC')
+        Variables.get_database().cursor.execute('SELECT * FROM readings ORDER BY timestamp DESC')
         results_2 = Variables.get_database().cursor.fetchall()
 
         # Checking number of results
@@ -59,6 +58,10 @@ class AppTest(unittest.TestCase):
         timestamp_2 = results_2[0]['timestamp']
         self.assertLessEqual(current_timestamp_2 - 1000, timestamp_2)
         self.assertLessEqual(timestamp_2, current_timestamp_2 + 1000)
+
+
+    def test_send_data(self):
+        pass
 
 
 if __name__ == '__main__':

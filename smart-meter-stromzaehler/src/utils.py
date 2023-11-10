@@ -1,6 +1,7 @@
 import jwt
 import os
 import time
+import requests
 
 
 def is_jwt_in_request(request):
@@ -21,3 +22,9 @@ def get_jwt_from_request(request):
 
 def get_current_milliseconds():
     return round(time.time() * 1000)
+
+
+def post(url, data):
+    request = requests.Request('POST', url, json=data)
+    prepared = request.prepare()
+    prepared.headers["X-"] = 'a'

@@ -10,7 +10,7 @@ class Database:
         self.cursor = self.connection.cursor()
 
     def clear_database(self):
-        self.cursor.execute('DELETE FROM zaehlerstand')
+        self.cursor.execute('DELETE FROM readings')
         self.cursor.execute('DELETE FROM logs')
         self.cursor.execute('DELETE FROM settings')
 
