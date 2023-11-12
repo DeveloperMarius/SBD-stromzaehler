@@ -7,7 +7,7 @@
 <Navbar let:NavContainer color="none">
 	<NavContainer class="border px-5 py-2 rounded-lg bg-white">
 		<NavBrand href="/">
-			<div class="self-center mr-3 h-6 sm:h-9 text-2xl">⚡</div>
+			<img class="self-center mr-3 h-6 sm:h-9 hover:scale-125 transition-all" src="/blitz.png" alt ="blitz" >
 			<span class="self-center whitespace-nowrap text-xl font-semibold">SmartStrom24</span>
 		</NavBrand>
 		<NavHamburger />

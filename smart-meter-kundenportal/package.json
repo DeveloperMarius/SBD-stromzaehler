@@ -48,6 +48,6 @@
 		"flowbite": "^1.8.1",
 		"flowbite-svelte": "^0.44.18",
 		"jsonwebtoken": "^9.0.2",
-		"tailwind-merge": "^1.14.0"
+		"tailwind-merge": "^2.0.0"
 	}
 }
