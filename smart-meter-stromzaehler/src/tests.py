@@ -3,12 +3,19 @@ from variables import Variables
 from app import Stromzaehler
 from utils import get_current_milliseconds
 import time
+import requests
+from dotenv import load_dotenv
+import os
 
 
 class AppTest(unittest.TestCase):
 
     def setUp(self):
         Variables.get_database().clear_database()
+
+    @classmethod
+    def setUpClass(self):
+        load_dotenv()
 
     def test_simulate_energyusage(self):
         # Running function to test
@@ -59,9 +66,24 @@ class AppTest(unittest.TestCase):
         self.assertLessEqual(current_timestamp_2 - 1000, timestamp_2)
         self.assertLessEqual(timestamp_2, current_timestamp_2 + 1000)
 
-
     def test_send_data(self):
-        pass
+        strom = Stromzaehler()
+        strom.simulate_energyusage()
+        strom.simulate_energyusage()
+
+        # Collecting logs
+        Variables.get_database().cursor.execute('SELECT * FROM logs')
+        result_logs = Variables.get_database().cursor.fetchall()
+        self.assertEqual(len(result_logs), 2)
+
+    def test_server_reachable(self):
+        response = None
+        try:
+            response = requests.get(f'{os.getenv("URL")}{"/healthcheck"}')
+        except Exception as e:
+            pass
+        self.assertIsNotNone(response)
+        self.assertEqual(response.status_code, 200)
 
 
 if __name__ == '__main__':

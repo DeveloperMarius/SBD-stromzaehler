@@ -7,7 +7,6 @@ import os
 from dotenv import load_dotenv
 import json
 import hashlib
-import hmac
 
 
 class Stromzaehler:
@@ -44,12 +43,14 @@ class Stromzaehler:
         }
 
         jwt_token = 'Bearer' + jwt.encode(jwt_data, os.getenv("JWT_SECRET_KEY"), "HS256")
-        response = requests.post('http://localhost:3000', headers={'Authorization': jwt_token}, data=body)
+        response = requests.post(os.getenv('URL'), headers={'Authorization': jwt_token}, data=body)
 
         if response.status_code != 200:
+            Variables.get_logger().log('Server not available.')
             return
         Variables.get_database().cursor.execute('DELETE FROM readings ORDER BY timestamp DESC LIMIT -1 OFFSET 1')
         Variables.get_database().cursor.execute('DELETE FROM logs')
+        Variables.get_logger().log('Data successfully sent to server.')
 
 
 if __name__ == '__main__':
