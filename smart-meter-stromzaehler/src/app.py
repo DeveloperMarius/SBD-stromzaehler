@@ -43,7 +43,7 @@ class Stromzaehler:
         }
 
         jwt_token = 'Bearer' + jwt.encode(jwt_data, os.getenv("JWT_SECRET_KEY"), "HS256")
-        response = requests.post(os.getenv('URL'), headers={'Authorization': jwt_token}, data=body)
+        response = requests.post(os.getenv('URL') + '/api/stromzaehler/update', headers={'Authorization': jwt_token}, data=body)
 
         if response.status_code != 200:
             Variables.get_logger().log('Server not available.')
