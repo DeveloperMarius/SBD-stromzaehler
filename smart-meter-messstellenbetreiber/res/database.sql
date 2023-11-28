@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS 'logs'(
     'id' INTEGER NOT NULL PRIMARY KEY,
-    'timestamp' DATETIME NOT NULL,
+    'timestamp' BIGINT NOT NULL,
     'endpoint' VARCHAR(200) NOT NULL,
     'method' VARCHAR(10) NOT NULL,
     'jwt_id' VARCHAR(200) NULL,
@@ -10,11 +10,11 @@ CREATE TABLE IF NOT EXISTS 'logs'(
 
 CREATE TABLE IF NOT EXISTS 'addresses'(
     'id' INTEGER NOT NULL PRIMARY KEY,
-    'city' VARCHAR(200),
     'street' VARCHAR(200),
     'plz' Integer,
-    'country' VARCHAR(200),
-    'state' VARCHAR(200)
+    'city' VARCHAR(200),
+    'state' VARCHAR(200),
+    'country' VARCHAR(200)
 );
 
 CREATE TABLE IF NOT EXISTS 'persons'(
@@ -49,10 +49,10 @@ CREATE TABLE IF NOT EXISTS 'stromzaehler_logs'(
 
 CREATE TABLE IF NOT EXISTS 'stromzaehler_readings'(
     'id' INTEGER NOT NULL PRIMARY KEY,
+    'stromzaehler' INTEGER NOT NULL,
     'source_id' INTEGER NOT NULL,
     'timestamp' BIGINT NOT NULL,
     'value' INTEGER NOT NULL,
-    'stromzaehler' INTEGER NOT NULL,
     Foreign Key ('stromzaehler') REFERENCES stromzaehler ('id') ON DELETE CASCADE
 );
 
