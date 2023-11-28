@@ -40,10 +40,10 @@ CREATE TABLE IF NOT EXISTS 'stromzaehler'(
 
 CREATE TABLE IF NOT EXISTS 'stromzaehler_logs'(
     'id' INTEGER NOT NULL PRIMARY KEY,
+    'stromzaehler' INTEGER NOT NULL,
     'source_id' INTEGER NOT NULL,
     'timestamp' BIGINT NOT NULL,
     'message' TEXT,
-    'stromzaehler' INTEGER NOT NULL,
     Foreign Key ('stromzaehler') REFERENCES stromzaehler ('id') ON DELETE CASCADE
 );
 

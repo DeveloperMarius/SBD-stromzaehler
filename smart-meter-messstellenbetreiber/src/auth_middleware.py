@@ -26,6 +26,6 @@ def token_required(f):
 
         Variables.get_logger().log(request, 'Successfully authorized!')
         # return f(current_user, *args, **kwargs)
-        return f(*args, **kwargs)
+        return f(jwt['id'], *args, **kwargs)
 
     return decorated
