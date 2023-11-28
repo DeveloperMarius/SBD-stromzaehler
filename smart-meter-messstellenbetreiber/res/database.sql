@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS 'addresses'(
     'state' VARCHAR(200)
 );
 
-CREATE TABLE IF NOT EXISTS 'landlords'(
+CREATE TABLE IF NOT EXISTS 'persons'(
     'id' INTEGER NOT NULL PRIMARY KEY,
     'firstname' VARCHAR(200) NOT NULL,
     'lastname' VARCHAR(200) NOT NULL,
@@ -31,8 +31,10 @@ CREATE TABLE IF NOT EXISTS 'stromzaehler'(
     'secret_key' VARCHAR(200),
     'address' Integer NOT NULL,
     'landlord' Integer NOT NULL,
+    'owner' INT NOT NULL,
     Foreign Key ('address') REFERENCES addresses ('id') ON DELETE CASCADE,
-    Foreign Key ('landlord') REFERENCES landlords ('id') ON DELETE CASCADE
+    Foreign Key ('landlord') REFERENCES persons ('id') ON DELETE CASCADE,
+    Foreign Key ('owner') REFERENCES persons ('id') ON DELETE CASCADE
 
 );
 
