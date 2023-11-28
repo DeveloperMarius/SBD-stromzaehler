@@ -6,14 +6,16 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  // provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
   id       String @id @default(uuid())
   email    String @unique
-  name     String
+  vorname  String
+  nachname String
   password String
 
   telefon String
@@ -26,14 +28,33 @@ model User {
 }
 
 model Contract {
-  id         String   @id @default(uuid())
+  id         String       @id @default(uuid())
   name       String
-  startDate  DateTime @default(now())
+  startDate  DateTime     @default(now())
   endDate    DateTime
-  user       User     @relation(fields: [userId], references: [id])
+  user       User         @relation(fields: [userId], references: [id])
   userId     String
-  powermeter Int      @unique
+  powermeter Powermeter[]
+}
 
-  preisProKWh     Float
+model Powermeter {
+  id         String    @id @default(uuid())
+  powermeter Int       @unique
+  Contract   Contract? @relation(fields: [contractId], references: [id])
+  contractId String?
+
   powermeterStart Int
+
+  readings Reading[]
+}
+
+model Reading {
+  id          String   @id @default(uuid())
+  readingDate DateTime @default(now())
+
+  kwhtotal Int
+  price    Float
+
+  powermeter   Powermeter? @relation(fields: [powermeterId], references: [id])
+  powermeterId String?
 }
