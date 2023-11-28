@@ -16,7 +16,12 @@ export const auth_guard: ServerLoad = ({ cookies }) => {
 		throw redirect(302, `/auth/login`);
 	}
 
-	const user = jwt.verify(token, process.env.JWT_SECRET);
+	let user;
+	try {
+		user = jwt.verify(token, process.env.JWT_SECRET);
+	} catch (error) {
+		throw redirect(302, `/auth/login`);
+	}
 
 	return {
 		status: 200,

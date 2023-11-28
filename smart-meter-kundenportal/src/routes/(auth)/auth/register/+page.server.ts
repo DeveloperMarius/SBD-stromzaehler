@@ -1,15 +1,19 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import prisma from '$lib/prisma';
+import type { Prisma } from '@prisma/client';
 import { fail, type Actions, redirect } from '@sveltejs/kit';
 import type { ServerLoad } from '@sveltejs/kit';
-import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import z from 'zod';
 
 export const load: ServerLoad = async ({ cookies }) => {
 	const token = cookies.get('token');
 
-	if (token && process.env.JWT_SECRET && jwt.verify(token, process.env.JWT_SECRET)) {
-		throw redirect(302, `/contract`);
+	try {
+		if (token && process.env.JWT_SECRET && jwt.verify(token, process.env.JWT_SECRET)) {
+			throw redirect(302, `/dashboard`);
+		}
+	} catch (error) {
+		console.error(error);
 	}
 
 	return {
@@ -19,7 +23,6 @@ export const load: ServerLoad = async ({ cookies }) => {
 
 export const actions: Actions = {
 	async register({ cookies, request }) {
-		const prisma = new PrismaClient();
 		const formData = await request.formData();
 
 		if (formData.get('password') !== formData.get('confirm-password'))
@@ -60,7 +63,10 @@ export const actions: Actions = {
 
 		user = form.data;
 
-		user.password = await bcrypt.hash(user.password, 10);
+		user.password = await Bun.password.hash(user.password, {
+			algorithm: 'bcrypt',
+			cost: 10
+		});
 
 		user = await prisma.user.create({
 			data: user
@@ -88,6 +94,6 @@ export const actions: Actions = {
 			sameSite: 'lax'
 		});
 
-		throw redirect(302, `/contract`);
+		throw redirect(302, `/dashboard`);
 	}
 };

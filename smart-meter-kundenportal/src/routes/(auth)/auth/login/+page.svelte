@@ -1,9 +1,15 @@
 <script lang="ts">
 	import { Section, Register } from 'flowbite-svelte-blocks';
-	import { Button, Checkbox, Label, Input } from 'flowbite-svelte';
+	import { Button, Label, Input } from 'flowbite-svelte';
 	import { enhance } from '$app/forms';
 	import { page } from '$app/stores';
 </script>
+
+<svelte:head>
+	<title>Anmelden</title>
+	<meta name="description" content="Anmelden" />
+	<meta name="robots" content="noindex" />
+</svelte:head>
 
 <div class="flex justify-center items-center h-screen">
 	<Section name="register" sectionClass="relative md:w-1/2 sm:3/4 w-11/12">
@@ -20,23 +26,15 @@
 						<span>Dein Passwort</span>
 						<Input type="password" name="password" placeholder="•••••" required />
 					</Label>
-					<div class="flex items-start">
-						<Checkbox
-							>Ich akzeptiere die <a
-								class="font-medium text-primary-600 hover:underline dark:text-primary-500 ml-1"
-								href="/"
-							>
-								AGBs und Datenschutzrichtlinien</a
-							></Checkbox
-						>
-					</div>
-					<Button type="submit" class="w-full1">Account erstellen</Button>
+					<Button type="submit" class="w-full1">Jetzt anmelden</Button>
 					<div class="text-sm font-medium text-gray-500 dark:text-gray-300">
-						Du hast bereits einen Account? <a
+						Du hast bereits einen Account?
+						<a
 							href="/auth/register"
 							class="font-medium text-primary-600 hover:underline dark:text-primary-500"
-							>Hier registrieren</a
 						>
+							Hier registrieren
+						</a>
 					</div>
 				</form>
 			</div>

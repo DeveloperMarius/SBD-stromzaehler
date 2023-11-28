@@ -1,15 +1,19 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import prisma from '$lib/prisma';
+import type { Prisma } from '@prisma/client';
 import { fail, type Actions, redirect } from '@sveltejs/kit';
 import type { ServerLoad } from '@sveltejs/kit';
-import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import z from 'zod';
 
 export const load: ServerLoad = async ({ cookies }) => {
 	const token = cookies.get('token');
 
-	if (token && process.env.JWT_SECRET && jwt.verify(token, process.env.JWT_SECRET)) {
-		throw redirect(302, `/contract`);
+	try {
+		if (token && process.env.JWT_SECRET && jwt.verify(token, process.env.JWT_SECRET)) {
+			throw redirect(302, `/dashboard`);
+		}
+	} catch (error) {
+		console.error(error);
 	}
 
 	return {
@@ -19,7 +23,6 @@ export const load: ServerLoad = async ({ cookies }) => {
 
 export const actions: Actions = {
 	async login({ cookies, request }) {
-		const prisma = new PrismaClient();
 		const formData = await request.formData();
 
 		const formUser = z
@@ -40,7 +43,7 @@ export const actions: Actions = {
 			}
 		});
 
-		if (!user || !(await bcrypt.compare(formUser.data.password, user.password))) {
+		if (!user || !(await Bun.password.verify(formUser.data.password, user.password))) {
 			return fail(400, {
 				error: 'Anmeldung fehlgeschlagen, bitte überprüfe deine Eingaben.'
 			});
@@ -63,6 +66,6 @@ export const actions: Actions = {
 			sameSite: 'lax'
 		});
 
-		throw redirect(302, `/contract`);
+		throw redirect(302, `/dashboard`);
 	}
 };

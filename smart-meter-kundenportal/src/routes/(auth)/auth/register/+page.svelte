@@ -5,6 +5,12 @@
 	import { page } from '$app/stores';
 </script>
 
+<svelte:head>
+	<title>Registrieren</title>
+	<meta name="description" content="Registrieren" />
+	<meta name="robots" content="noindex" />
+</svelte:head>
+
 <div class="flex justify-center items-center h-screen">
 	<Section name="register" sectionClass="relative md:w-1/2 sm:3/4 w-11/12">
 		<Register href="/">

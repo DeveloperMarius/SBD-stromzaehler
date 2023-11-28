@@ -1,13 +1,13 @@
 <script>
 	import '../app.css';
+	import '@fontsource/roboto';
+	import '@fontsource/manrope';
 </script>
 
-<div id="bg-img">
-	<slot><!-- optional fallback --></slot>
-</div>
+<slot><!-- optional fallback --></slot>
 
-<style lang="postcss">	
-	#bg-img {
-		background: url(/background.png) no-repeat center center fixed;
+<style lang="postcss">
+	:global(body) {
+		min-height: 100vh;
 	}
 </style>

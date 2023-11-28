@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  output   = "./generated/client"
 }
 
 datasource db {
@@ -28,33 +29,28 @@ model User {
 }
 
 model Contract {
-  id         String       @id @default(uuid())
-  name       String
-  startDate  DateTime     @default(now())
-  endDate    DateTime
-  user       User         @relation(fields: [userId], references: [id])
-  userId     String
+  id        String   @id @default(uuid())
+  name      String
+  startDate DateTime @default(now())
+  endDate   DateTime
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+
+  strasse String
+  hausnr  String
+  plz     String
+  ort     String
+
+  iban String
+  blz  String
+
   powermeter Powermeter[]
 }
 
 model Powermeter {
   id         String    @id @default(uuid())
-  powermeter Int       @unique
-  Contract   Contract? @relation(fields: [contractId], references: [id])
+  Contract   Contract? @relation(fields: [contractId], references: [id], onDelete: Cascade)
   contractId String?
 
   powermeterStart Int
-
-  readings Reading[]
-}
-
-model Reading {
-  id          String   @id @default(uuid())
-  readingDate DateTime @default(now())
-
-  kwhtotal Int
-  price    Float
-
-  powermeter   Powermeter? @relation(fields: [powermeterId], references: [id])
-  powermeterId String?
 }
