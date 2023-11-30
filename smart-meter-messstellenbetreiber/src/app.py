@@ -2,6 +2,8 @@ from flask import Flask, jsonify, request
 import os
 from dotenv import load_dotenv
 from api_routes import api_routes_blueprint
+import atexit
+from variables import Variables
 
 #load_dotenv()
 
@@ -36,5 +38,10 @@ def forbidden(e):
     }), 404
 
 
+def on_exit():
+    Variables.get_database().session.close()
+
+
 if __name__ == "__main__":
+    atexit.register(on_exit)
     app.run(debug=True)
