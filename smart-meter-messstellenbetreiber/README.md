@@ -11,6 +11,16 @@ Token must be signed with HS256 and should contain the object `JwtToken`.
 
 ## Endpoints
 
+### /api/landlord
+pass adress and get landlord
+
+### /api/stromzaehler
+pass address get 
+
+- aktuelle messwerte
+- preis pro kwh + history (von bis)
+- stromzahler registrieren
+
 ### GET /api/healthcheck
 Der Endpunkt dient zum Überprüfen, ob das Messstellenbetreiberportal online und
 erreichbar ist.

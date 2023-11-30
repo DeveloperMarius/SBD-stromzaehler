@@ -1,7 +1,7 @@
 from flask import jsonify, Blueprint, request
 from auth_middleware import token_required
 from variables import Variables
-
+from datetime import datetime
 
 api_routes_blueprint = Blueprint('API Routes', __name__)
 
@@ -32,3 +32,15 @@ def stromzaehler_update(stromzaehler):
             stromzaehler
         ))
     return '', 200
+
+
+@api_routes_blueprint.route('/stromzaehler/history', methods=['GET'])
+@token_required
+def get_stromzaehler_history(stromzaehler):
+    data = request.data
+    try:
+        start_date = round(datetime.strptime(data['start_date'], '%Y-%m-%d').timestamp() * 1000)
+        end_date = round(datetime.strptime(data['end_date'], '%Y-%m-%d').timestamp() * 1000)
+    except:
+        return '', 422
+
