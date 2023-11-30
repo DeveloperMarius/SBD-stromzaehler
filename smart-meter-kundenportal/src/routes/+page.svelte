@@ -61,8 +61,8 @@
 		</NavUl>
 	</NavContainer>
 </Navbar>
-<div class="px-5 pt-2">
-	<div class="pb-5 py-3 bg-white bg-opacity-50 backdrop-blur-md rounded-lg">
+<div class="flex justify-center px-5 pt-2">
+	<div class="pb-5 py-3 max-w-screen-2xl grow bg-white bg-opacity-50 backdrop-blur-md rounded-lg">
 		<Section name="heroVisual" class="border px-5 py-2 rounded-lg lg:grid lg:grid-cols-12">
 			<div class="place-self-center lg:col-span-7">
 				<HeroHeader
@@ -92,13 +92,16 @@
 </div>
 
 <div class="px-5 py-5">
+	<div class="flex justify-center">
 	<div
-		class="px-5 pb-2 bg-white bg-opacity-50 backdrop-blur-md justify-items-center text-center rounded-lg"
+		class="px-5 pb-2 max-w-screen-2xl grow bg-white bg-opacity-50 backdrop-blur-md justify-items-center text-center rounded-lg"
 	>
 		<Heading tag="h1" class="mb-4">Warum wir?</Heading>
 		<P class="text-center">Es gibt eine Menge an Vorteilen die Sie mit uns erleben werden</P>
 	</div>
-	<div class="features-grid pt-2">
+</div>
+<div class="flex justify-center">
+	<div class="features-grid gap-32 pt-2">
 		<Card class="bg-opacity-50 backdrop-blur-md">
 			<GiftBoxSolid class="w-7 h-7 mb-3 text-gray-500 dark:text-gray-400 self-center" />
 			<a href="/">
@@ -135,6 +138,7 @@
 			</p>
 		</Card>
 	</div>
+</div>
 </div>
 
 <div class="px-5 py-5">
