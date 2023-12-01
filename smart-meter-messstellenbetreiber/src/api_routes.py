@@ -6,7 +6,6 @@ from datetime import datetime
 from models import StromzaehlerLog, StromzaehlerReading, Log
 from sqlalchemy import select
 
-
 api_routes_blueprint = Blueprint('API Routes', __name__)
 
 
@@ -67,27 +66,36 @@ def stromzaehler_update(stromzaehler):
 
 
 @api_routes_blueprint.route('/stromzaehler/history', methods=['GET'])
-# @token_required
+@token_required
 def get_stromzaehler_history(stromzaehler):
-    print('request')
-    data = request.data
+    data = request.json
     try:
         start_date = round(datetime.strptime(data['start_date'], '%Y-%m-%d').timestamp() * 1000)
         end_date = round(datetime.strptime(data['end_date'], '%Y-%m-%d').timestamp() * 1000)
-    except:
+        stromzaehler_id = data['stromzaehler_id']
+    except Exception as e:
+        print(e)
         return '', 422
 
-    statement = select(StromzaehlerReading).where(StromzaehlerReading.stromzaehler == stromzaehler and end_date <= StromzaehlerReading.timestamp >= start_date).order_by(
-        StromzaehlerReading.timestamp.desc())
-    readings = Variables.get_database().session.scalar(statement)
+    statement = select(StromzaehlerReading).where(
+        (StromzaehlerReading.stromzaehler == stromzaehler_id) &
+        (start_date <= StromzaehlerReading.timestamp) &
+        (StromzaehlerReading.timestamp <= end_date)
+    ).order_by(StromzaehlerReading.timestamp.desc())
+    response = Variables.get_database().session.scalars(statement)
+    raw_readings = response.fetchall()
+
+    readings = []
+    for i in raw_readings:
+        reading = {
+            "stromzaehler": i.stromzaehler,
+            "timestamp": i.timestamp,
+            "value": i.value
+        }
+        readings.append(reading)
 
     Variables.get_logger().log(request, f'Provided stromzaehler readings in period: {start_date} - {end_date}.')  # todo get jwt
 
     return jsonify({
         'readings': readings
     }), 200
-
-# @api_routes_blueprint.route('/stromzaehler/register', methods=['POST'])
-# @token_required
-# def register_stromzaehler(stromzaehler):
-#
