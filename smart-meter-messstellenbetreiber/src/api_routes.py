@@ -1,9 +1,9 @@
 import json
 from flask import jsonify, Blueprint, request
 from auth_middleware import token_required
-from variables import Variables
+from utils import Variables
 from datetime import datetime
-from models import StromzaehlerLog, StromzaehlerReading
+from models import StromzaehlerLog, StromzaehlerReading, Log
 from sqlalchemy import select
 
 
@@ -67,8 +67,9 @@ def stromzaehler_update(stromzaehler):
 
 
 @api_routes_blueprint.route('/stromzaehler/history', methods=['GET'])
-@token_required
+# @token_required
 def get_stromzaehler_history(stromzaehler):
+    print('request')
     data = request.data
     try:
         start_date = round(datetime.strptime(data['start_date'], '%Y-%m-%d').timestamp() * 1000)
@@ -76,3 +77,17 @@ def get_stromzaehler_history(stromzaehler):
     except:
         return '', 422
 
+    statement = select(StromzaehlerReading).where(StromzaehlerReading.stromzaehler == stromzaehler and end_date <= StromzaehlerReading.timestamp >= start_date).order_by(
+        StromzaehlerReading.timestamp.desc())
+    readings = Variables.get_database().session.scalar(statement)
+
+    Variables.get_logger().log(request, f'Provided stromzaehler readings in period: {start_date} - {end_date}.')  # todo get jwt
+
+    return jsonify({
+        'readings': readings
+    }), 200
+
+# @api_routes_blueprint.route('/stromzaehler/register', methods=['POST'])
+# @token_required
+# def register_stromzaehler(stromzaehler):
+#

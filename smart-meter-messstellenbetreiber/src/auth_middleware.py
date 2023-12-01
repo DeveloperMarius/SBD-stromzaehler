@@ -1,7 +1,7 @@
 from functools import wraps
 from flask import request
 from utils import get_jwt_from_request, is_jwt_in_request
-from variables import Variables
+from utils import Variables
 
 
 def token_required(f):
