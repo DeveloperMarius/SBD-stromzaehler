@@ -31,6 +31,8 @@ class EventHandler:
             value = data[column.name]
             if isinstance(column.type, String):
                 length = column.type.length
+                if value is None and not column.nullable:
+                    raise ValueError(f"{column.name} cannot be null.")
                 if len(value) > length:
                     raise ValueError(f"{column.name} is to long. {len(value)} > {length}")
 
@@ -46,7 +48,7 @@ class Log(Base):
     timestamp: Mapped[int] = mapped_column(BigInteger())
     endpoint: Mapped[str] = mapped_column(String(200))
     method: Mapped[str] = mapped_column(String(10))
-    jwt_id: Mapped[str] = mapped_column(String(200))
+    jwt_id: Mapped[str] = mapped_column(String(200), nullable=True)
     message: Mapped[str] = mapped_column(String(3000))
 
     def __repr__(self) -> str:
