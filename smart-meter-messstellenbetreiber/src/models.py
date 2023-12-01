@@ -129,10 +129,3 @@ class Setting(Base):
 
     def __repr__(self) -> str:
         return f"Setting(id={self.key!r})"
-
-from sqlalchemy import select, desc
-from variables import Variables
-
-statement = select(Log).order_by(Log.timestamp.desc()).limit(1)
-last_reading = Variables.get_database().session.scalar(statement)
-print(last_reading)

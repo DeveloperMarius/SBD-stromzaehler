@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from api_routes import api_routes_blueprint
 import atexit
-from variables import Variables
+from utils import Variables
 
 #load_dotenv()
 
