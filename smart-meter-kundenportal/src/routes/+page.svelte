@@ -1,16 +1,20 @@
 <script>
-	import { Navbar, NavBrand, NavHamburger, NavUl, NavLi, Button } from 'flowbite-svelte';
+	import { Navbar, NavBrand, NavHamburger, NavUl, NavLi, Button, Search, Dropdown, DropdownItem, DropdownDivider, Checkbox  } from 'flowbite-svelte';
 	import { Section, HeroHeader } from 'flowbite-svelte-blocks';
 	import { ArrowRightSolid } from 'flowbite-svelte-icons';
 	import { Card } from 'flowbite-svelte';
-	import { FeatureDefault, FeatureItem } from 'flowbite-svelte-blocks';
+	import { TableHeader } from 'flowbite-svelte-blocks';
 	import {
 		ChartSolid,
 		LandmarkSolid,
 		BriefcaseSolid,
 		DollarSolid,
 		RocketSolid,
-		CogOutline
+		CogOutline,
+		ChevronDownOutline,
+		GlobeOutline,
+		ComputerSpeakerSolid,
+		FilePenOutline
 	} from 'flowbite-svelte-icons';
 	import {
 		Footer,
@@ -62,7 +66,7 @@
 	</NavContainer>
 </Navbar>
 <div class="flex justify-center px-5 pt-2">
-	<div class="pb-5 py-3 max-w-screen-2xl grow bg-white bg-opacity-50 backdrop-blur-md rounded-lg">
+	<div class="py-20 max-w-screen-2xl grow bg-white bg-opacity-50 backdrop-blur-md rounded-lg">
 		<Section name="heroVisual" class="border px-5 py-2 rounded-lg lg:grid lg:grid-cols-12">
 			<div class="place-self-center lg:col-span-7">
 				<HeroHeader
@@ -76,12 +80,12 @@
 						Technologien und erweitern kontinuierlich unser Portfolio an Projekten.
 					</svelte:fragment>
 					<a href="/">
-						<Button size="xl" color="red" class="inline-flex items-center justify-center mr-3">
+						<Button size="xl" color="primary" class="inline-flex items-center justify-center mr-3">
 							Get started<ArrowRightSolid size="md" class="ml-2 -mr-1" />
 						</Button>
 					</a>
 					<a href="/">
-						<Button color="light" size="xl" class="inline-flex items-center justify-center">
+						<Button size="xl" class="bg-primary-50 text-gray-600 inline-flex items-center justify-center">
 							Speak to Sales
 						</Button>
 					</a>
@@ -91,10 +95,11 @@
 	</div>
 </div>
 
-<div class="px-5 py-5">
-	<div class="flex justify-center">
+<div class="px-5 py-10 flex justify-center">
+	<div class="py-10 bg-lighty-50 bg-opacity-70 backdrop-blur-md rounded-lg max-w-screen-2xl grow">
+	<div class="px-5 pb-2 flex justify-center">
 	<div
-		class="px-5 pb-2 max-w-screen-2xl grow bg-white bg-opacity-50 backdrop-blur-md justify-items-center text-center rounded-lg"
+		class="justify-items-center text-center "
 	>
 		<Heading tag="h1" class="mb-4">Warum wir?</Heading>
 		<P class="text-center">Es gibt eine Menge an Vorteilen die Sie mit uns erleben werden</P>
@@ -102,49 +107,84 @@
 </div>
 <div class="flex justify-center">
 	<div class="features-grid gap-32 pt-2">
-		<Card class="bg-opacity-50 backdrop-blur-md">
-			<GiftBoxSolid class="w-7 h-7 mb-3 text-gray-500 dark:text-gray-400 self-center" />
+		<Card class="bg-opacity-0 backdrop-blur-md">
+			<GlobeOutline class="w-7 h-7 mb-3 text-gray-500 dark:text-gray-400 self-center" />
 			<a href="/">
-				<h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
+				<h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white text-center">
 					Erneuerbare Energiequellen
 				</h5>
 			</a>
-			<p class="mb-3 font-normal text-gray-500 dark:text-gray-400">
+			<p class="mb-3 font-normal text-gray-500 dark:text-gray-400 text-center">
 				Wir schonen nachhaltige Methoden zur Energiegewinnung die Umwelt und tragen zur Reduzierung
 				der Kohlenstoffemissionen bei
 			</p>
 		</Card>
-		<Card class="bg-opacity-50 backdrop-blur-md">
-			<GiftBoxSolid class="w-7 h-7 mb-3 text-gray-500 dark:text-gray-400 self-center" />
+		<Card class="bg-opacity-0 backdrop-blur-md">
+			<ComputerSpeakerSolid class="w-7 h-7 mb-3 text-gray-500 dark:text-gray-400 self-center" />
 			<a href="/">
-				<h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
+				<h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white text-center">
 					Smart Stromzähler
 				</h5>
 			</a>
-			<p class="mb-3 font-normal text-gray-500 dark:text-gray-400">
+			<p class="mb-3 font-normal text-gray-500 dark:text-gray-400 text-center">
 				Wir verwenden neueste Technologie des Stromzählers und zeigen Ihre Stromdaten in der
 				Echtzeit
 			</p>
 		</Card>
-		<Card class="bg-opacity-50 backdrop-blur-md">
-			<GiftBoxSolid class="w-7 h-7 mb-3 text-gray-500 dark:text-gray-400 self-center" />
+		<Card class="bg-opacity-0 backdrop-blur-md">
+			<FilePenOutline class="w-7 h-7 mb-3 text-gray-500 dark:text-gray-400 self-center" />
 			<a href="/">
-				<h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
+				<h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white text-center">
 					Schnell und einfach
 				</h5>
 			</a>
-			<p class="mb-3 font-normal text-gray-500 dark:text-gray-400">
+			<p class="mb-3 font-normal text-gray-500 dark:text-gray-400 text-center">
 				Schließen Sie Ihren Vertrag mit uns reibungslos ab
 			</p>
 		</Card>
 	</div>
 </div>
 </div>
+</div>
 
-<div class="px-5 py-5">
+<div class="px-5 pb-10 flex justify-center">
+	<div class="py-10 bg-lighty-50 bg-opacity-70 backdrop-blur-md rounded-lg max-w-screen-2xl grow">
+	<div class="px-5 pb-2 flex justify-center">
 	<div
-		class="px-5 pb-2 bg-white bg-opacity-50 backdrop-blur-md justify-items-center text-center rounded-lg"
+		class="justify-items-center text-center "
 	>
+		<Heading tag="h1" class="mb-4">Ihre Angaben</Heading>
+		<P class="text-center">Welche Angebote sind verfügbar</P>
+	</div>
+</div>
+<div class="flex justify-center space-y-8">
+  <Search size="lg" placeholder="Ihr PLZ" class="w-50 h-15" />
+
+	<Button color="light">
+	 Ihr Verbrauch<ChevronDownOutline />
+	</Button>
+	<Dropdown class="w-50 h-15">
+		<DropdownItem>Gering</DropdownItem>
+		<DropdownDivider />
+		<DropdownItem>Mittel</DropdownItem>
+		<DropdownDivider />
+		<DropdownItem>Hoch</DropdownItem>
+	</Dropdown>
+	<Button class="w-50 h-15">
+		Jetzt berechnen!
+	</Button>
+
+</div>
+	</div>
+</div>
+
+
+<div class="px-5 pb-10 flex justify-center">
+	<div class="py-10 bg-lighty-50 bg-opacity-70 backdrop-blur-md rounded-lg max-w-screen-2xl grow">
+	<div class="px-5 pb-2 flex justify-center">
+	<div
+			class="justify-items-center text-center "
+		>
 		<Heading tag="h1" class="mb-4">Unsere Angebote</Heading>
 		<P class="text-center">Wählen Sie einen passenden Vertrag</P>
 	</div>
@@ -154,119 +194,107 @@
 	<div class="space-y-8 lg:grid lg:grid-cols-3 sm:gap-6 xl:gap-10 lg:space-y-0">
 		<PricingCard class="bg-opacity-50 backdrop-blur-md">
 			<PricingBodyHead>
-				<svelte:fragment slot="h3">Eco</svelte:fragment>
-				<svelte:fragment slot="paragraph">einfach</svelte:fragment>
+				<svelte:fragment slot="h3">Standard</svelte:fragment>
+				<svelte:fragment slot="paragraph">Standardvertrag mit fixer Laufzeit </svelte:fragment>
 				<svelte:fragment slot="price">
-					<span class="mr-2 text-5xl font-extrabold">29€</span>
+					<span class="mr-2 text-5xl font-extrabold">55€</span>
 					<span class="text-gray-500 dark:text-gray-400">/monat</span>
 				</svelte:fragment>
 			</PricingBodyHead>
 			<PricingItemWrapper>
 				<PricingItem class="text-green-500 dark:text-green-400">
-					<span>Individual configuration</span>
+					<span>Vertragslaufzeit: 24 Monate</span>
 				</PricingItem>
 				<PricingItem class="text-green-500 dark:text-green-400">
-					<span>No setup, or hidden fees</span>
+					<span>Neukundenbonus: 24€</span>
 				</PricingItem>
 				<PricingItem class="text-green-500 dark:text-green-400">
 					<span>
-						Team size: <span class="font-semibold">1 developer</span>
+						Arbeitspreis pro kWh: <span class="font-semibold">29,44 ct</span>
 					</span>
 				</PricingItem>
 				<PricingItem class="text-green-500 dark:text-green-400">
 					<span>
-						Premium support: <span class="font-semibold">6 months</span>
-					</span>
-				</PricingItem>
-				<PricingItem class="text-green-500 dark:text-green-400">
-					<span>
-						Free updates: <span class="font-semibold">6 months</span>
+						Grundpreis pro Monat: <span class="font-semibold">10,00 €</span>
 					</span>
 				</PricingItem>
 
 				<svelte:fragment slot="btn">
-					<Button color="red">Vertrag abschließen</Button>
+					<Button color="primary" class="mt-4">Vertrag abschließen</Button>
 				</svelte:fragment>
 			</PricingItemWrapper>
 		</PricingCard>
 
 		<PricingCard class="bg-opacity-50 backdrop-blur-md">
 			<PricingBodyHead>
-				<svelte:fragment slot="h3">Standart</svelte:fragment>
-				<svelte:fragment slot="paragraph">bessere support.</svelte:fragment>
+				<svelte:fragment slot="h3">Flex-Tarif</svelte:fragment>
+				<svelte:fragment slot="paragraph">Jederzeit kündbar</svelte:fragment>
 				<svelte:fragment slot="price">
-					<span class="mr-2 text-5xl font-extrabold">99€</span>
+					<span class="mr-2 text-5xl font-extrabold">65€</span>
 					<span class="text-gray-500 dark:text-gray-400">/monat</span>
 				</svelte:fragment>
 			</PricingBodyHead>
 			<PricingItemWrapper>
 				<PricingItem class="text-green-500 dark:text-green-400">
-					<span>Individual configuration</span>
+					<span>Vertragslaufzeit: 1 Monat</span>
 				</PricingItem>
 				<PricingItem class="text-green-500 dark:text-green-400">
-					<span>No setup, or hidden fees</span>
+					<span>Flexibel</span>
 				</PricingItem>
 				<PricingItem class="text-green-500 dark:text-green-400">
 					<span>
-						Team size: <span class="font-semibold">10 developer</span>
+						Arbeitspreis pro kWh: <span class="font-semibold">29,44 ct</span>
 					</span>
 				</PricingItem>
 				<PricingItem class="text-green-500 dark:text-green-400">
 					<span>
-						Premium support: <span class="font-semibold">24 months</span>
-					</span>
-				</PricingItem>
-				<PricingItem class="text-green-500 dark:text-green-400">
-					<span>
-						Free updates: <span class="font-semibold">24 months</span>
+						Grundpreis pro Monat: <span class="font-semibold">20,00 €</span>
 					</span>
 				</PricingItem>
 
+
 				<svelte:fragment slot="btn">
-					<Button color="red">Vertrag abschließen</Button>
+					<Button color="primary" class="mt-4">Vertrag abschließen</Button>
 				</svelte:fragment>
 			</PricingItemWrapper>
 		</PricingCard>
 
 		<PricingCard class="bg-opacity-50 backdrop-blur-md">
 			<PricingBodyHead>
-				<svelte:fragment slot="h3">Premium</svelte:fragment>
-				<svelte:fragment slot="paragraph">Best support</svelte:fragment>
+				<svelte:fragment slot="h3">Preisgarantie</svelte:fragment>
+				<svelte:fragment slot="paragraph">Langzeit-Festpreistarif</svelte:fragment>
 				<svelte:fragment slot="price">
-					<span class="mr-2 text-5xl font-extrabold">$120€</span>
+					<span class="mr-2 text-5xl font-extrabold">60€</span>
 					<span class="text-gray-500 dark:text-gray-400">/monat</span>
 				</svelte:fragment>
 			</PricingBodyHead>
 			<PricingItemWrapper>
 				<PricingItem class="text-green-500 dark:text-green-400">
-					<span>Individual configuration</span>
+					<span>Vertragslaufzeit: 12 Monate</span>
 				</PricingItem>
 				<PricingItem class="text-green-500 dark:text-green-400">
-					<span>No setup, or hidden fees</span>
+					<span>Preisgarantie: 12 Monate</span>
 				</PricingItem>
 				<PricingItem class="text-green-500 dark:text-green-400">
 					<span>
-						Team size: <span class="font-semibold">100+ developer</span>
+						Arbeitspreis pro kWh: <span class="font-semibold">28,51 ct</span>
 					</span>
 				</PricingItem>
 				<PricingItem class="text-green-500 dark:text-green-400">
 					<span>
-						Premium support: <span class="font-semibold">36 months</span>
-					</span>
-				</PricingItem>
-				<PricingItem class="text-green-500 dark:text-green-400">
-					<span>
-						Free updates: <span class="font-semibold">36 months</span>
+						Grundpreis pro Monat: <span class="font-semibold">15,00 €</span>
 					</span>
 				</PricingItem>
 
 				<svelte:fragment slot="btn">
-					<Button color="red">Vertrag abschließen</Button>
+					<Button color="primary" class="mt-4">Vertrag abschließen</Button>
 				</svelte:fragment>
 			</PricingItemWrapper>
 		</PricingCard>
 	</div>
 </Section>
+	</div>
+</div>
 
 <div class="pt-5">
 	<Footer footerType="socialmedia" class="bg-primary-600 bg-opacity-50 backdrop-blur-md">
@@ -301,6 +329,7 @@
 		</div>
 	</Footer>
 </div>
+
 
 <style lang="scss">
 	:global(body) {

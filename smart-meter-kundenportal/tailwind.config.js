@@ -19,16 +19,28 @@ export default {
 			colors: {
 				// flowbite-svelte
 				primary: {
-					50: '#FFF5F2',
+					50: '#DCF1C8',
 					100: '#FFF1EE',
-					200: '#FFE4DE',
-					300: '#FFD5CC',
-					400: '#FFBCAd',
-					500: '#FE795D',
-					600: '#56e08c',
-					700: '#189982',
-					800: '#0497a1',
-					900: '#0A5580'
+					200: '#EEE881', //gelb
+					300: '#98D789', // noch hellgrün
+					400: '#ACEF92', //hellgrün
+					500: '#018590', //grünblau
+					600: '#0A84B0', // wenig heller blau
+					700: '#0B6988', //navi 
+					800: '#59B78C', // grün
+					900: '#1E6952' //navi
+				},
+				lighty: {
+					50: '#DCF1C8',
+					100: '#62C8E4', //skyblue
+					200: '#DCF1C8', 
+					300: '#DCF1C8', 
+					400: '#DCF1C8', 
+					500: '#DCF1C8', 
+					600: '#DCF1C8', 
+					700: '#DCF1C8', 
+					800: '#DCF1C8', 
+					900: '#DCF1C8' 
 				}
 			},
 			backgroundImage: {
