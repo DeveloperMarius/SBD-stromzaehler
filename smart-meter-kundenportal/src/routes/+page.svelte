@@ -14,7 +14,10 @@
 		ChevronDownOutline,
 		GlobeOutline,
 		ComputerSpeakerSolid,
-		FilePenOutline
+		FilePenOutline,
+		MailBoxOutline,
+		PhoneOutline
+
 	} from 'flowbite-svelte-icons';
 	import {
 		Footer,
@@ -58,10 +61,10 @@
 		</div>
 		<NavUl class="order-1 items-end">
 			<NavLi href="/" active={true}>Home</NavLi>
-			<NavLi href="/about">Über uns</NavLi>
+			<NavLi href="#uberuns">Über uns</NavLi>
 			<NavLi href="/docs/components/navbar">Preise</NavLi>
-			<NavLi href="/pricing">Angebote</NavLi>
-			<NavLi href="/contact">Kontakt</NavLi>
+			<NavLi href="#angebote">Angebote</NavLi>
+			<NavLi href="#kontakt">Kontakt</NavLi>
 		</NavUl>
 	</NavContainer>
 </Navbar>
@@ -95,7 +98,7 @@
 	</div>
 </div>
 
-<div class="px-5 py-10 flex justify-center">
+<div class="px-5 py-10 flex justify-center" id="uberuns">
 	<div class="py-10 bg-lighty-50 bg-opacity-70 backdrop-blur-md rounded-lg max-w-screen-2xl grow">
 	<div class="px-5 pb-2 flex justify-center">
 	<div
@@ -147,39 +150,8 @@
 </div>
 </div>
 
-<div class="px-5 pb-10 flex justify-center">
-	<div class="py-10 bg-lighty-50 bg-opacity-70 backdrop-blur-md rounded-lg max-w-screen-2xl grow">
-	<div class="px-5 pb-2 flex justify-center">
-	<div
-		class="justify-items-center text-center "
-	>
-		<Heading tag="h1" class="mb-4">Ihre Angaben</Heading>
-		<P class="text-center">Welche Angebote sind verfügbar</P>
-	</div>
-</div>
-<div class="flex justify-center space-y-8">
-  <Search size="lg" placeholder="Ihr PLZ" class="w-50 h-15" />
 
-	<Button color="light">
-	 Ihr Verbrauch<ChevronDownOutline />
-	</Button>
-	<Dropdown class="w-50 h-15">
-		<DropdownItem>Gering</DropdownItem>
-		<DropdownDivider />
-		<DropdownItem>Mittel</DropdownItem>
-		<DropdownDivider />
-		<DropdownItem>Hoch</DropdownItem>
-	</Dropdown>
-	<Button class="w-50 h-15">
-		Jetzt berechnen!
-	</Button>
-
-</div>
-	</div>
-</div>
-
-
-<div class="px-5 pb-10 flex justify-center">
+<div class="px-5 pb-10 flex justify-center" id="angebote">
 	<div class="py-10 bg-lighty-50 bg-opacity-70 backdrop-blur-md rounded-lg max-w-screen-2xl grow">
 	<div class="px-5 pb-2 flex justify-center">
 	<div
@@ -294,6 +266,45 @@
 	</div>
 </Section>
 	</div>
+</div>
+
+<div class="px-5 pb-10 flex justify-center" id="kontakt">
+	<div class="py-10 bg-lighty-50 bg-opacity-70 backdrop-blur-md rounded-lg max-w-screen-2xl grow">
+	<div class="px-5 pb-2 flex justify-center">
+	<div
+		class="justify-items-center text-center "
+	>
+		<Heading tag="h1" class="mb-4">Kontaktiere uns</Heading>
+		<P class="text-center">Wir sind für dich 24/7 erreichbar</P>
+	</div>
+</div>
+<div class="flex justify-center">
+	<div class="features-grid gap-32 pt-2">
+		<Card class="bg-opacity-0 backdrop-blur-md">
+			<MailBoxOutline class="w-7 h-7 mb-3 text-gray-500 dark:text-gray-400 self-center" />
+			<a href="/">
+				<h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white text-center">
+					Schreib uns 
+				</h5>
+			</a>
+			<p class="mb-3 font-normal text-gray-500 dark:text-gray-400 text-center">
+				info@smartstrom24.jetzt
+			</p>
+		</Card>
+		<Card class="bg-opacity-0 backdrop-blur-md">
+			<PhoneOutline class="w-7 h-7 mb-3 text-gray-500 dark:text-gray-400 self-center" />
+			<a href="/">
+				<h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white text-center">
+					Ruf uns an
+				</h5>
+			</a>
+			<p class="mb-3 font-normal text-gray-500 dark:text-gray-400 text-center">
+				0800 666 6969
+			</p>
+		</Card>
+	</div>
+</div>
+</div>
 </div>
 
 <div class="pt-5">
