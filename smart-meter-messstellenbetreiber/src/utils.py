@@ -36,6 +36,7 @@ class Database:
 class Logger:
     @staticmethod
     def log(request, message, jwt_id=None):
+        print(f"{request.method} {request.path}: {message}")
         # data = (datetime.now(), request.path, request.method, jwt_id, message)
         # self.database.cursor.execute('INSERT INTO logs ("timestamp", "endpoint", "method", "jwt_id", "message") VALUES (?, ?, ?, ?, ?)', data)
         log = Log(
