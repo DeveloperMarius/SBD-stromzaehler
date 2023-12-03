@@ -1,17 +1,34 @@
 version: '3'
 services:
-  stromzaehler:
+  messstellenbetreiber1:
+    build: ./smart-meter-messstellenbetreiber
+    ports:
+      - "9001:5000"
+    expose:
+      - 9001
+    networks:
+      - internet
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  stromzaehler1:
     build: ./smart-meter-stromzaehler
     ports:
-      - 5001-5010:5000
-    command: /bin/bash -c "{}"
-    deploy:
-      replicas: 10
-    # depends_on:
-    #   - kundenportal
+      - "5001:5000"
+    expose:
+      - 5001
+    environment:
+      - MESSSTELLENBETREIBER_URL=http://host.docker.internal:9001
+      - JWT_SECRET_KEY=zZ6E8ecJ3ufMrhTpBk4RRtgoYMcWKpqyNH4xYUV8MHENsiixBJgPCherFqBPzwws
+      - STROMZAEHLER_ID=1
+    #  - 5001-5010:5000
+    #deploy:
+    #  replicas: 10
     networks:
-      stromnetz:
+      - internet
+    depends_on:
+      - messstellenbetreiber1
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 networks:
-    stromnetz:
-
+  internet:
 # https://stackoverflow.com/questions/56203272/docker-compose-scaling-with-unique-environment-variable
