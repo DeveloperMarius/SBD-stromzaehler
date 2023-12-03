@@ -40,7 +40,7 @@ class Logger:
         # self.database.cursor.execute('INSERT INTO logs ("timestamp", "endpoint", "method", "jwt_id", "message") VALUES (?, ?, ?, ?, ?)', data)
         log = Log(
             timestamp=datetime.now(),
-            enpoint=request.path,
+            endpoint=request.path,
             method=request.method,
             jwt_id=jwt_id,
             message=message
@@ -65,16 +65,13 @@ def get_jwt_from_request(request):
         return None
 
     statement = select(Stromzaehler.secret_key).where(Stromzaehler.id == jwt_data['id'])
-    secret_key_data = Variables.get_database().session.scalar(statement)
+    secret_key = Variables.get_database().session.scalar(statement)
 
-    # Variables.get_database().cursor.execute('SELECT secret_key FROM stromzaehler WHERE id=?', jwt_data['id'])
-    # secret_key_data = Variables.get_database().cursor.fetchone()
-
-    if secret_key_data is None:
+    if secret_key is None:
         return None
 
     try:
-        data = jwt.decode(token, secret_key_data['secret_key'], algorithms=["HS256"])
+        data = jwt.decode(token, secret_key, algorithms=["HS256"])
         return data
     except Exception as e:
         print(str(e))

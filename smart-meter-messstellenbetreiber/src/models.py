@@ -31,8 +31,10 @@ class EventHandler:
             value = data[column.name]
             if isinstance(column.type, String):
                 length = column.type.length
-                if value is None and not column.nullable:
-                    raise ValueError(f"{column.name} cannot be null.")
+                if value is None:
+                    if not column.nullable:
+                        raise ValueError(f"{column.name} cannot be null.")
+                    continue
                 if len(value) > length:
                     raise ValueError(f"{column.name} is to long. {len(value)} > {length}")
 
