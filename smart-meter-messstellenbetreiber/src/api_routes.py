@@ -2,9 +2,9 @@ import json
 import jwt
 from flask import jsonify, Blueprint, request
 from auth_middleware import token_required
-from utils import Variables
+from utils import Variables, get_public_rsa_key, get_private_rsa_key
 from datetime import datetime
-from models import StromzaehlerLog, StromzaehlerReading, Person, Address
+from models import StromzaehlerLog, StromzaehlerReading, Stromzaehler, Person, Address
 from sqlalchemy import select
 import hashlib
 from cryptography.hazmat.primitives import serialization
@@ -109,10 +109,7 @@ def get_stromzaehler_history(stromzaehler):
         'signature': hashlib.sha256(json.dumps(body).encode('utf-8')).hexdigest()
     }
 
-    with open('.ssh/id_rsa', 'r') as file:
-        key = file.read()
-    private_key = serialization.load_ssh_private_key((key.encode()), password=b'')
-    jwt_token = 'Bearer ' + jwt.encode(jwt_data, private_key, "RS256")
+    jwt_token = 'Bearer ' + jwt.encode(jwt_data, get_private_rsa_key(), "RS256")
 
     response.headers['Authorization'] = jwt_token
 
@@ -121,9 +118,6 @@ def get_stromzaehler_history(stromzaehler):
 
 @api_routes_blueprint.route('/public_key', methods=['GET'])
 def get_public_key():
-    with open('.ssh/id_rsa.pub', 'r') as file:
-        public_key = file.read()
-
     return jsonify({
-        'public_key': str(public_key)
+        'public_key': get_public_rsa_key()
     })

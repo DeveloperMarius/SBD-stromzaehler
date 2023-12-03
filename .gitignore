@@ -4,4 +4,4 @@
 __pycache__
 *.db
 .DS_Store
-.ssh
+id_rsa*

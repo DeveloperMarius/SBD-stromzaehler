@@ -5,6 +5,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 from sqlalchemy import select
+from cryptography.hazmat.primitives import serialization
 
 
 class Variables:
@@ -75,3 +76,16 @@ def get_jwt_from_request(request):
     except Exception as e:
         print(str(e))
     return None
+
+
+def get_private_rsa_key():
+    with open('../res/id_rsa') as file:
+        key = file.read()
+    private_key = serialization.load_ssh_private_key((key.encode()), password=b'')
+    return private_key
+
+
+def get_public_rsa_key():
+    with open('../res/id_rsa.pub') as file:
+        key = file.read()
+    return str(key)
