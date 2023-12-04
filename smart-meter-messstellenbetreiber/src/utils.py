@@ -6,6 +6,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 from sqlalchemy import select
 from cryptography.hazmat.primitives import serialization
+from flask import jsonify
+import json
+import hashlib
 
 
 class Variables:
@@ -90,3 +93,19 @@ def get_public_rsa_key():
     with open('../res/id_rsa.pub') as file:
         key = file.read()
     return str(key)
+
+
+def signing_response(body: dict):
+    response = jsonify(body)
+
+    jwt_data = {
+        'mode': "SHA256",
+        'signature': hashlib.sha256(json.dumps(body).encode('utf-8')).hexdigest()
+    }
+
+    jwt_token = 'Bearer ' + jwt.encode(jwt_data, get_private_rsa_key(), "RS256")
+
+    response.headers['Authorization'] = jwt_token
+
+    return response
+
