@@ -87,7 +87,7 @@ def get_stromzaehler_history(stromzaehler):
     readings = []
     for i in raw_readings:
         reading = {
-            "stromzaehler": i.stromzaehler,
+            "stromzaehler_id": i.stromzaehler,
             "timestamp": i.timestamp,
             "value": i.value
         }

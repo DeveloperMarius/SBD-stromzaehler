@@ -1,6 +1,6 @@
 import jwt
 import os
-from models import Stromzaehler, Log
+from models import Stromzaehler, Log, Kundenportal
 from datetime import datetime
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
@@ -58,6 +58,14 @@ def is_jwt_in_request(request):
     return "Authorization" in request.headers
 
 
+def is_body_signature_valid(request, jwt_body) -> bool:
+    if jwt_body['mode'] is None or jwt_body['mode'] != 'SHA256' or jwt_body['signature'] is None:
+        return False
+    body = request.get_json()
+    actual_hash = hashlib.sha256(json.dumps(body).encode('utf-8')).hexdigest()
+    return actual_hash == jwt_body['signature']
+
+
 def get_jwt_from_request(request):
     if not is_jwt_in_request(request):
         return None
@@ -65,21 +73,32 @@ def get_jwt_from_request(request):
     token = request.headers["Authorization"].split(" ")[1]
     jwt_data = jwt.decode(token, options={"verify_signature": False})
 
-    if jwt_data is None or jwt_data['id'] is None:
+    if jwt_data is None or jwt_data['type'] is None or jwt_data['id'] is None:
         return None
 
-    statement = select(Stromzaehler.secret_key).where(Stromzaehler.id == jwt_data['id'])
-    secret_key = Variables.get_database().session.scalar(statement)
+    if jwt_data['type'] == 'stromzaehler':
+        statement = select(Stromzaehler.public_key).where(Stromzaehler.id == jwt_data['id'])
+        public_key = Variables.get_database().session.scalar(statement)
+    elif jwt_data['type'] == 'kundenportal':
+        statement = select(Kundenportal.public_key).where(Kundenportal.id == jwt_data['id'])
+        public_key = Variables.get_database().session.scalar(statement)
+    else:
+        return None
 
-    if secret_key is None:
+    if public_key is None:
         return None
 
     try:
-        data = jwt.decode(token, secret_key, algorithms=["HS256"])
-        return data
+        key = serialization.load_ssh_public_key((public_key.encode()))
+        data = jwt.decode(token, key, algorithms=['RS256'])
     except Exception as e:
         print(str(e))
-    return None
+        return None
+
+    if is_body_signature_valid(request, data):
+        return data
+    else:
+        return None
 
 
 def get_private_rsa_key():
@@ -108,4 +127,3 @@ def signing_response(body: dict):
     response.headers['Authorization'] = jwt_token
 
     return response
-

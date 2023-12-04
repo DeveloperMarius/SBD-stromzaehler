@@ -7,6 +7,7 @@ import os
 from dotenv import load_dotenv
 import json
 import hashlib
+from cryptography.hazmat.primitives import serialization
 
 
 class Stromzaehler:
@@ -37,12 +38,17 @@ class Stromzaehler:
         })
 
         jwt_data = {
+            'type': 'stromzaehler',
             'id': os.getenv('STROMZAEHLER_ID'),
             'mode': "SHA256",
             'signature': hashlib.sha256(body.encode('utf-8')).hexdigest()
         }
 
-        jwt_token = 'Bearer' + jwt.encode(jwt_data, os.getenv("JWT_SECRET_KEY"), "HS256")
+        with open('../res/id_rsa') as file:
+            key = file.read()
+        private_key = serialization.load_ssh_private_key((key.encode()), password=b'')
+
+        jwt_token = 'Bearer ' + jwt.encode(jwt_data, private_key, "RS256")
         response = requests.post(os.getenv('MESSSTELLENBETREIBER_URL') + '/api/stromzaehler/update', headers={'Authorization': jwt_token}, data=body)
 
         if response.status_code != 200:
