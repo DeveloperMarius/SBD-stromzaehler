@@ -5,9 +5,8 @@ from auth_middleware import token_required
 from utils import Variables, get_public_rsa_key, get_private_rsa_key
 from datetime import datetime
 from models import StromzaehlerLog, StromzaehlerReading, Stromzaehler, Person, Address
-from sqlalchemy import select
+from sqlalchemy import select, update
 import hashlib
-from cryptography.hazmat.primitives import serialization
 
 api_routes_blueprint = Blueprint('API Routes', __name__)
 
@@ -32,7 +31,7 @@ def healthcheck():
 @api_routes_blueprint.route('/stromzaehler/update', methods=['POST'])
 @token_required
 def stromzaehler_update(stromzaehler):
-    data = request.data
+    data = request.json
 
     statement = select(StromzaehlerReading).where(StromzaehlerReading.stromzaehler == stromzaehler).order_by(StromzaehlerReading.timestamp.desc()).limit(1)
     last_reading = Variables.get_database().session.scalar(statement)
@@ -114,6 +113,92 @@ def get_stromzaehler_history(stromzaehler):
     response.headers['Authorization'] = jwt_token
 
     return response
+
+
+@api_routes_blueprint.route('/stromzaehler/register', methods=['POST'])
+@token_required
+def register_stromzaehler(stromzaehler):
+    data = request.json
+    try:
+        stromzaehler_id = data['id']
+        first_name = data['person']['first_name']
+        last_name = data['person']['last_name']
+        gender = data['person']['gender']
+        phone = data['person']['phone'] if 'phone' in data['person'] else None
+        email = data['person']['email'] if 'email' in data['person'] else None
+        street = data['address']['street']
+        plz = data['address']['plz']
+        city = data['address']['city']
+        state = data['address']['state']
+        country = data['address']['country']
+    except Exception as e:
+        print(e)
+        return '', 422
+
+    # Check if stromzaehler exists
+    statement = select(Stromzaehler).where(Stromzaehler.id == stromzaehler_id)
+    response = Variables.get_database().session.scalars(statement)
+    stromzaehler = response.fetchall()
+    if len(stromzaehler) == 0:
+        return 'Stromzaehler does not exist.', 404
+
+    # Check if address exists
+    statement = select(Address).where(
+        (Address.street == street) &
+        (Address.plz == plz) &
+        (Address.city == city) &
+        (Address.state == state) &
+        (Address.country == country)
+    ).limit(1)
+    response = Variables.get_database().session.scalars(statement)
+    add = response.fetchall()
+    if len(add) == 0:
+        new_add = Address(
+            street=street,
+            plz=plz,
+            city=city,
+            state=state,
+            country=country
+        )
+        Variables.get_database().session.add(new_add)
+        Variables.get_database().session.commit()
+        add_id = new_add.id
+    else:
+        add_id = add[0].id
+
+    # Check if owner exists
+    statement = select(Person).where(
+        (Person.firstname == first_name) &
+        (Person.lastname == last_name) &
+        (Person.gender == gender) &
+        (Person.email == email)
+    ).limit(1)
+    response = Variables.get_database().session.scalars(statement)
+    own = response.fetchall()
+    if len(own) == 0:
+        new_own = Person(
+            firstname=first_name,
+            lastname=last_name,
+            gender=gender,
+            phone=phone,
+            email=email
+        )
+        Variables.get_database().session.add(new_own)
+        Variables.get_database().session.commit()
+        own_id = new_own.id
+    else:
+        own_id = own[0].id
+
+    stromzaehler[0].address = add_id
+    stromzaehler[0].owner = own_id
+    Variables.get_database().session.commit()
+
+    return jsonify({
+        'message': 'Successfully registered new stromzaehler',
+        'stromzaehler_id': stromzaehler[0].id,
+        'owner_id': own_id,
+        'address_id': add_id
+        })
 
 
 @api_routes_blueprint.route('/public_key', methods=['GET'])

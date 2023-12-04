@@ -3,3 +3,4 @@ flask
 pyjwt
 sqlalchemy
 requests
+cryptography

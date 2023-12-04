@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS 'stromzaehler'(
     'secret_key' VARCHAR(200),
     'address' Integer NOT NULL,
     'landlord' Integer NOT NULL,
-    'owner' INT NOT NULL,
+    'owner' INT,
     Foreign Key ('address') REFERENCES addresses ('id') ON DELETE CASCADE,
     Foreign Key ('landlord') REFERENCES persons ('id') ON DELETE CASCADE,
     Foreign Key ('owner') REFERENCES persons ('id') ON DELETE CASCADE

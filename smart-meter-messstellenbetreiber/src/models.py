@@ -90,7 +90,7 @@ class Stromzaehler(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     secret_key: Mapped[str] = mapped_column(String(200))
     address: Mapped[int] = mapped_column(Integer(), ForeignKey("addresses.id"))
-    user: Mapped[int] = mapped_column(Integer(), ForeignKey("persons.id"))
+    landlord: Mapped[int] = mapped_column(Integer(), ForeignKey("persons.id"))
     owner: Mapped[int] = mapped_column(Integer(), ForeignKey("persons.id"))
 
     def __repr__(self) -> str:
