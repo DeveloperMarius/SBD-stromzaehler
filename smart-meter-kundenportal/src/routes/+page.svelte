@@ -280,7 +280,7 @@
 </div>
 <div class="flex justify-center">
 	<div class="features-grid gap-32 pt-2">
-		<Card class="bg-opacity-0 backdrop-blur-md">
+		<Card class="bg-opacity-0 backdrop-blur-md w-72">
 			<MailBoxOutline class="w-7 h-7 mb-3 text-gray-500 dark:text-gray-400 self-center" />
 			<a href="/">
 				<h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white text-center">
@@ -291,7 +291,7 @@
 				info@smartstrom24.jetzt
 			</p>
 		</Card>
-		<Card class="bg-opacity-0 backdrop-blur-md">
+		<Card class="bg-opacity-0 backdrop-blur-md w-72">
 			<PhoneOutline class="w-7 h-7 mb-3 text-gray-500 dark:text-gray-400 self-center" />
 			<a href="/">
 				<h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white text-center">
