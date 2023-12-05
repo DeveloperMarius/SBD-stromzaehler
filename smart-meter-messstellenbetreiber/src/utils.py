@@ -102,15 +102,13 @@ def get_jwt_from_request(request):
 
 
 def get_private_rsa_key():
-    with open('../res/id_rsa') as file:
-        key = file.read()
+    key = os.getenv('PRIVATE_KEY')
     private_key = serialization.load_ssh_private_key((key.encode()), password=b'')
     return private_key
 
 
 def get_public_rsa_key():
-    with open('../res/id_rsa.pub') as file:
-        key = file.read()
+    key = os.getenv('PUBLIC_KEY')
     return str(key)
 
 
