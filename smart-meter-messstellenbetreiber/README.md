@@ -39,6 +39,29 @@ zu senden.
 }
 ```
 
+### GET /api/stromzaehler/history
+Dieser Endpunkt wird vom Kundenportal genutzt, um die Zählerstände von einem Stromzähler in einem bestimmten Zeitraum abzufragen.
+#### Request
+```json
+{
+  "stromzaehler-id": 1,
+  "start_date": "YYYY-MM-DD",
+  "end_date": "YYYY-MM-DD"
+}
+```
+#### Response
+```json
+{
+  "readings": [
+    {
+      "stromzaehler_id": 1,
+      "timestamp": 1701689349628,
+      "value": 1234
+    }
+  ]
+}
+```
+
 ## Objects
 
 ### JwtToken

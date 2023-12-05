@@ -88,13 +88,23 @@ class Person(Base):
 class Stromzaehler(Base):
     __tablename__ = "stromzaehler"
     id: Mapped[int] = mapped_column(primary_key=True)
-    secret_key: Mapped[str] = mapped_column(String(200))
+    public_key: Mapped[str] = mapped_column(String(2000))
     address: Mapped[int] = mapped_column(Integer(), ForeignKey("addresses.id"))
     landlord: Mapped[int] = mapped_column(Integer(), ForeignKey("persons.id"))
     owner: Mapped[int] = mapped_column(Integer(), ForeignKey("persons.id"))
 
     def __repr__(self) -> str:
         return f"Stromzaehler(id={self.id!r})"
+
+
+class Kundenportal(Base):
+    __tablename__ = "kundenportale"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    public_key: Mapped[str] = mapped_column(String(2000))
+    url: Mapped[str] = mapped_column(String(200))
+
+    def __repr__(self) -> str:
+        return f"Kundenport(id={self.id!r})"
 
 
 class StromzaehlerLog(Base):

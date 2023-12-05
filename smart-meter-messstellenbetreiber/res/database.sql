@@ -28,14 +28,19 @@ CREATE TABLE IF NOT EXISTS 'persons'(
 
 CREATE TABLE IF NOT EXISTS 'stromzaehler'(
     'id' INTEGER NOT NULL PRIMARY KEY,
-    'secret_key' VARCHAR(200),
+    'public_key' VARCHAR(2000),
     'address' Integer NOT NULL,
     'landlord' Integer NOT NULL,
     'owner' INT,
     Foreign Key ('address') REFERENCES addresses ('id') ON DELETE CASCADE,
     Foreign Key ('landlord') REFERENCES persons ('id') ON DELETE CASCADE,
     Foreign Key ('owner') REFERENCES persons ('id') ON DELETE CASCADE
+);
 
+CREATE TABLE IF NOT EXISTS 'kundenportale'(
+    'id' INTEGER NOT NULL PRIMARY KEY,
+    'url' VARCHAR(200) NOT NULL,
+    'public_key' VARCHAR(2000) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS 'stromzaehler_logs'(

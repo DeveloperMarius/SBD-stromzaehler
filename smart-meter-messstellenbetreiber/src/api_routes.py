@@ -1,12 +1,9 @@
-import json
-import jwt
 from flask import jsonify, Blueprint, request
 from auth_middleware import token_required
-from utils import Variables, get_public_rsa_key, get_private_rsa_key
+from utils import Variables, get_public_rsa_key, signing_response
 from datetime import datetime
 from models import StromzaehlerLog, StromzaehlerReading, Stromzaehler, Person, Address
-from sqlalchemy import select, update
-import hashlib
+from sqlalchemy import select
 
 api_routes_blueprint = Blueprint('API Routes', __name__)
 
@@ -90,7 +87,7 @@ def get_stromzaehler_history(stromzaehler):
     readings = []
     for i in raw_readings:
         reading = {
-            "stromzaehler": i.stromzaehler,
+            "stromzaehler_id": i.stromzaehler,
             "timestamp": i.timestamp,
             "value": i.value
         }
@@ -101,18 +98,7 @@ def get_stromzaehler_history(stromzaehler):
     body = {
         "readings": readings
     }
-    response = jsonify(body)
-
-    jwt_data = {
-        'mode': "SHA256",
-        'signature': hashlib.sha256(json.dumps(body).encode('utf-8')).hexdigest()
-    }
-
-    jwt_token = 'Bearer ' + jwt.encode(jwt_data, get_private_rsa_key(), "RS256")
-
-    response.headers['Authorization'] = jwt_token
-
-    return response
+    return signing_response(body)
 
 
 @api_routes_blueprint.route('/stromzaehler/register', methods=['POST'])
@@ -123,7 +109,7 @@ def register_stromzaehler(stromzaehler):
         stromzaehler_id = data['id']
         first_name = data['person']['first_name']
         last_name = data['person']['last_name']
-        gender = data['person']['gender']
+        gender = data['person']['gender'] if 'gender' in data['person'] else 0
         phone = data['person']['phone'] if 'phone' in data['person'] else None
         email = data['person']['email'] if 'email' in data['person'] else None
         street = data['address']['street']
@@ -193,12 +179,13 @@ def register_stromzaehler(stromzaehler):
     stromzaehler[0].owner = own_id
     Variables.get_database().session.commit()
 
-    return jsonify({
-        'message': 'Successfully registered new stromzaehler',
+    body = {
+        'success': True,
         'stromzaehler_id': stromzaehler[0].id,
         'owner_id': own_id,
         'address_id': add_id
-        })
+    }
+    return signing_response(body)
 
 
 @api_routes_blueprint.route('/public_key', methods=['GET'])
