@@ -4,15 +4,13 @@ from dotenv import load_dotenv
 from api_routes import api_routes_blueprint
 import atexit
 from utils import Variables
+import sys
+import traceback
 
-#load_dotenv()
+load_dotenv(f"{os.path.dirname(os.path.realpath(__file__))}/../res/.env")
 
 app = Flask(__name__)
 app.register_blueprint(api_routes_blueprint, url_prefix='/api')
-
-# JWT
-JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
-print(JWT_SECRET_KEY)
 
 
 @app.route("/api")
@@ -38,10 +36,17 @@ def forbidden(e):
     }), 404
 
 
-def on_exit():
-    Variables.get_database().session.close()
+@app.errorhandler(Exception)
+def handle_exception(e):
+    exc_type, exc_obj, exc_tb = sys.exc_info()
+    print(f'catch {exc_type}: {str(e)} - {traceback.format_exc()}')
+
+    return jsonify({
+        "message": "Error",
+        "error": 'Error',
+        "data": None
+    }), 500
 
 
 if __name__ == "__main__":
-    atexit.register(on_exit)
     app.run(debug=True)

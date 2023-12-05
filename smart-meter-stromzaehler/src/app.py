@@ -37,19 +37,18 @@ class Stromzaehler:
             'logs': logs
         })
 
-        print(os.environ)
         jwt_data = {
             'type': 'stromzaehler',
-            'id': os.getenv('STROMZAEHLER_ID'),
+            'id': int(os.getenv('STROMZAEHLER_ID')),
             'mode': "SHA256",
             'signature': hashlib.sha256(body.encode('utf-8')).hexdigest()
         }
 
-        key = os.getenv('PUBLIC_KEY')
-        private_key = serialization.load_ssh_private_key((key.encode()), password=b'')
+        key = os.getenv('PRIVATE_KEY').replace('\\n', '\n')
+        private_key = serialization.load_pem_private_key(key.encode(), password=None)
 
-        jwt_token = 'Bearer ' + jwt.encode(jwt_data, private_key, "RS256")
-        response = requests.post(os.getenv('MESSSTELLENBETREIBER_URL') + '/api/stromzaehler/update', headers={'Authorization': jwt_token}, data=body)
+        jwt_token = 'Bearer ' + jwt.encode(jwt_data, private_key, "EdDSA", headers={'crv': 'Ed25519'})
+        response = requests.post(os.getenv('MESSSTELLENBETREIBER_URL') + '/api/stromzaehler/update', headers={'Authorization': jwt_token, 'Content-Type': 'application/json'}, data=body)
 
         if response.status_code != 200:
             Variables.get_logger().log('Server not available.')
@@ -60,7 +59,7 @@ class Stromzaehler:
 
 
 if __name__ == '__main__':
-    load_dotenv()
+    load_dotenv(f"{os.path.dirname(os.path.realpath(__file__))}/../res/.env")
     try:
         Stromzaehler.simulate_energyusage()
         Variables.get_logger().log('Successfully simulated energyusage!')

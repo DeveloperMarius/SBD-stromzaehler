@@ -1,5 +1,7 @@
 from utils import get_current_milliseconds
 from datetime import datetime
+import logging
+
 
 class Logger:
 
@@ -7,6 +9,6 @@ class Logger:
         self.database = database
 
     def log(self, message):
-        print(message)
+        logging.debug(message)
         timestamp = datetime.fromtimestamp(get_current_milliseconds() / 1000)
         self.database.cursor.execute('INSERT INTO logs ("timestamp", "message") VALUES (?, ?)', (timestamp, message))

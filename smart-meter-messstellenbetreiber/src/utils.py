@@ -1,5 +1,7 @@
+import logging
 import jwt
 import os
+import time
 from models import Stromzaehler, Log, Kundenportal
 from datetime import datetime
 from sqlalchemy.orm import Session
@@ -9,7 +11,11 @@ from cryptography.hazmat.primitives import serialization
 from flask import jsonify
 import json
 import hashlib
+import sys
+import traceback
 
+def get_current_milliseconds():
+    return round(time.time() * 1000)
 
 class Variables:
     db_instance = None
@@ -31,27 +37,28 @@ class Variables:
 class Database:
 
     def __init__(self):
-        print(f"sqlite://{os.path.dirname(os.path.realpath(__file__))}/../res/messstellenbetreiber.db")
-        engine = create_engine(f"sqlite:///{os.path.dirname(os.path.realpath(__file__))}/../res/messstellenbetreiber.db", echo=True)
-        self.session = Session(engine)
+        self.engine = create_engine(f"sqlite:///{os.path.dirname(os.path.realpath(__file__))}/../res/database.db", echo=False)
+
+    def get_engin(self):
+        return self.engine
 
 
 class Logger:
     @staticmethod
     def log(request, message, jwt_id=None):
-        print(f"{request.method} {request.path}: {message}")
+        logging.debug(f"{request.method} {request.path}: {message}")
         # data = (datetime.now(), request.path, request.method, jwt_id, message)
         # self.database.cursor.execute('INSERT INTO logs ("timestamp", "endpoint", "method", "jwt_id", "message") VALUES (?, ?, ?, ?, ?)', data)
         log = Log(
-            timestamp=datetime.now(),
+            timestamp=get_current_milliseconds(),
             endpoint=request.path,
             method=request.method,
             jwt_id=jwt_id,
             message=message
         )
-        Variables.get_database().session.add(log)
-
-        Variables.get_database().session.commit()
+        with Session(Variables.get_database().get_engin()) as session:
+            session.add(log)
+            session.commit()
 
 
 def is_jwt_in_request(request):
@@ -78,10 +85,13 @@ def get_jwt_from_request(request):
 
     if jwt_data['type'] == 'stromzaehler':
         statement = select(Stromzaehler.public_key).where(Stromzaehler.id == jwt_data['id'])
-        public_key = Variables.get_database().session.scalar(statement)
+
+        with Session(Variables.get_database().get_engin()) as session:
+            public_key = session.scalar(statement).replace('\\n', '\n')
     elif jwt_data['type'] == 'kundenportal':
         statement = select(Kundenportal.public_key).where(Kundenportal.id == jwt_data['id'])
-        public_key = Variables.get_database().session.scalar(statement)
+        with Session(Variables.get_database().get_engin()) as session:
+            public_key = session.scalar(statement).replace('\\n', '\n')
     else:
         return None
 
@@ -89,10 +99,11 @@ def get_jwt_from_request(request):
         return None
 
     try:
-        key = serialization.load_ssh_public_key((public_key.encode()))
-        data = jwt.decode(token, key, algorithms=['RS256'])
+        key = serialization.load_pem_public_key((public_key.encode()))
+        data = jwt.decode(token, key, algorithms=['EdDSA'])
     except Exception as e:
-        print(str(e))
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        print(f'{exc_type}: {str(e)} - {traceback.format_exc()}')
         return None
 
     if is_body_signature_valid(request, data):
@@ -102,13 +113,13 @@ def get_jwt_from_request(request):
 
 
 def get_private_rsa_key():
-    key = os.getenv('PRIVATE_KEY')
-    private_key = serialization.load_ssh_private_key((key.encode()), password=b'')
+    key = os.getenv('PRIVATE_KEY').replace('\\n', '\n')
+    private_key = serialization.load_pem_private_key((key.encode()), password=None)
     return private_key
 
 
 def get_public_rsa_key():
-    key = os.getenv('PUBLIC_KEY')
+    key = os.getenv('PUBLIC_KEY').replace('\\n', '\n')
     return str(key)
 
 
@@ -120,7 +131,7 @@ def signing_response(body: dict):
         'signature': hashlib.sha256(json.dumps(body).encode('utf-8')).hexdigest()
     }
 
-    jwt_token = 'Bearer ' + jwt.encode(jwt_data, get_private_rsa_key(), "RS256")
+    jwt_token = 'Bearer ' + jwt.encode(jwt_data, get_private_rsa_key(), "EdDSA", headers={'crv': 'Ed25519'})
 
     response.headers['Authorization'] = jwt_token
 

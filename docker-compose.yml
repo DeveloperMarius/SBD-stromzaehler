@@ -12,15 +12,23 @@ services:
       - "host.docker.internal:host-gateway"
   stromzaehler1:
     build: ./smart-meter-stromzaehler
-    ports:
-      - "5001:5000"
-    expose:
-      - 5001
     volumes:
-      - ./smart-meter-stromzaehler/src/.env-1:/python-docker/src/.env
+      - ./smart-meter-stromzaehler/generated/.env-1:/python-docker/res/.env
+      - ./smart-meter-stromzaehler/generated/database-1.db:/python-docker/res/database.db
     #  - 5001-5010:5000
     #deploy:
     #  replicas: 10
+    networks:
+      - internet
+    depends_on:
+      - messstellenbetreiber1
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  stromzaehler2:
+    build: ./smart-meter-stromzaehler
+    volumes:
+      - ./smart-meter-stromzaehler/generated/.env-2:/python-docker/res/.env
+      - ./smart-meter-stromzaehler/generated/database-2.db:/python-docker/res/database.db
     networks:
       - internet
     depends_on:

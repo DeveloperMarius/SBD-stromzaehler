@@ -29,9 +29,9 @@ CREATE TABLE IF NOT EXISTS 'persons'(
 CREATE TABLE IF NOT EXISTS 'stromzaehler'(
     'id' INTEGER NOT NULL PRIMARY KEY,
     'public_key' VARCHAR(2000),
-    'address' Integer NOT NULL,
-    'landlord' Integer NOT NULL,
-    'owner' INT,
+    'address' INT NOT NULL,
+    'landlord' INT NOT NULL,
+    'owner' INT NOT NULL,
     Foreign Key ('address') REFERENCES addresses ('id') ON DELETE CASCADE,
     Foreign Key ('landlord') REFERENCES persons ('id') ON DELETE CASCADE,
     Foreign Key ('owner') REFERENCES persons ('id') ON DELETE CASCADE
