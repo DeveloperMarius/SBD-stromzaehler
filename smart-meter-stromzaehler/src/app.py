@@ -36,6 +36,7 @@ class Stromzaehler:
             'logs': logs
         })
 
+        print(os.environ)
         jwt_data = {
             'id': os.getenv('STROMZAEHLER_ID'),
             'mode': "SHA256",

@@ -16,10 +16,8 @@ services:
       - "5001:5000"
     expose:
       - 5001
-    environment:
-      - MESSSTELLENBETREIBER_URL=http://host.docker.internal:9001
-      - JWT_SECRET_KEY=zZ6E8ecJ3ufMrhTpBk4RRtgoYMcWKpqyNH4xYUV8MHENsiixBJgPCherFqBPzwws
-      - STROMZAEHLER_ID=1
+    volumes:
+      - ./smart-meter-stromzaehler/src/.env-1:/python-docker/src/.env
     #  - 5001-5010:5000
     #deploy:
     #  replicas: 10

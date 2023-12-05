@@ -1,0 +1,4 @@
+#!/bin/bash
+
+~/.bashrc
+export test2=test
