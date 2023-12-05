@@ -44,8 +44,7 @@ class Stromzaehler:
             'signature': hashlib.sha256(body.encode('utf-8')).hexdigest()
         }
 
-        with open('../res/id_rsa') as file:
-            key = file.read()
+        key = os.getenv('PUBLIC_KEY')
         private_key = serialization.load_ssh_private_key((key.encode()), password=b'')
 
         jwt_token = 'Bearer ' + jwt.encode(jwt_data, private_key, "RS256")

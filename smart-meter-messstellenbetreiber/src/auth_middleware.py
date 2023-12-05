@@ -8,7 +8,6 @@ def token_required(f):
 
     @wraps(f)
     def decorated(*args, **kwargs):
-        message = ''
 
         jwt = get_jwt_from_request(request)
         if jwt is None:
