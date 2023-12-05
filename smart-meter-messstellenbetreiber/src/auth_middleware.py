@@ -23,7 +23,7 @@ def token_required(entity_type):
                     "error": "Unauthorized"
                 }, 401
 
-            Variables.get_logger().log(request, 'Successfully authorized!')
+            Variables.get_logger().log(request, 'Successfully authorized!', jwt['type'], jwt['id'])
             return f(jwt['id'], *args, **kwargs)
 
         return decorated

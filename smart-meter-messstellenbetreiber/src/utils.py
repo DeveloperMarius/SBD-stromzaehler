@@ -46,15 +46,14 @@ class Database:
 
 class Logger:
     @staticmethod
-    def log(request, message, jwt_id=None):
+    def log(request, message, source_type=None, source_id=None):
         logging.debug(f"{request.method} {request.path}: {message}")
-        # data = (datetime.now(), request.path, request.method, jwt_id, message)
-        # self.database.cursor.execute('INSERT INTO logs ("timestamp", "endpoint", "method", "jwt_id", "message") VALUES (?, ?, ?, ?, ?)', data)
         log = Log(
             timestamp=get_current_milliseconds(),
             endpoint=request.path,
             method=request.method,
-            jwt_id=jwt_id,
+            source_type=source_type,
+            source_id=source_id,
             message=message
         )
         with Session(Variables.get_database().get_engin()) as session:
