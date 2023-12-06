@@ -59,6 +59,7 @@ class Logger:
         with Session(Variables.get_database().get_engin()) as session:
             session.add(log)
             session.commit()
+        return log.id
 
 
 def is_jwt_in_request(request):

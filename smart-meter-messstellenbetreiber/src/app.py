@@ -13,20 +13,6 @@ app = Flask(__name__)
 app.register_blueprint(api_routes_blueprint, url_prefix='/api')
 
 
-@app.route("/api")
-def hello_world():
-    return "Hello, World!"
-
-
-@app.errorhandler(403)
-def forbidden(e):
-    return jsonify({
-        "message": "Forbidden",
-        "error": str(e),
-        "data": None
-    }), 403
-
-
 @app.errorhandler(404)
 def forbidden(e):
     return jsonify({
@@ -39,11 +25,11 @@ def forbidden(e):
 @app.errorhandler(Exception)
 def handle_exception(e):
     exc_type, exc_obj, exc_tb = sys.exc_info()
-    print(f'catch {exc_type}: {str(e)} - {traceback.format_exc()}')
-
+    log_id = Variables.get_logger().log(request, f"{exc_type}: {str(e)} - {traceback.format_exc()}")
     return jsonify({
         "message": "Error",
         "error": 'Error',
+        "log_id": log_id,
         "data": None
     }), 500
 

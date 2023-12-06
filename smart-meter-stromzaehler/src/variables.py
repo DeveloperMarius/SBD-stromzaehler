@@ -13,7 +13,7 @@ class Variables:
         return Variables.logger_instance
 
     @staticmethod
-    def get_database():
+    def get_database(database_location=None):
         if Variables.db_instance is None:
-            Variables.db_instance = Database()
+            Variables.db_instance = Database(database_location)
         return Variables.db_instance

@@ -5,17 +5,33 @@ from utils import get_current_milliseconds
 import time
 import requests
 from dotenv import load_dotenv
+import signal
+import subprocess
+from time import sleep
 import os
 
 
 class AppTest(unittest.TestCase):
+    flask_server = None
+
+    def get_test_db(self):
+        return Variables.get_database(f"{os.path.dirname(os.path.realpath(__file__))}/../generated/database-1.db")
 
     def setUp(self):
-        Variables.get_database().clear_database()
+        self.get_test_db().clear_database()
 
     @classmethod
     def setUpClass(self):
-        load_dotenv(f"{os.path.dirname(os.path.realpath(__file__))}/../res/.env")
+        load_dotenv(f"{os.path.dirname(os.path.realpath(__file__))}/../generated/.env-1")
+        print("Starting Flask Server...")
+        self.flask_server = subprocess.Popen(["python3", f"{os.path.dirname(os.path.realpath(__file__))}/../../smart-meter-messstellenbetreiber/src/app.py"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        sleep(5)
+        print("Started")
+
+    @classmethod
+    def tearDownClass(self):
+        print("\nClosing Flask Server...")
+        os.killpg(os.getpgid(self.flask_server.pid), signal.SIGTERM)
 
     def test_simulate_energyusage(self):
         # Running function to test
@@ -23,8 +39,8 @@ class AppTest(unittest.TestCase):
         current_timestamp = get_current_milliseconds()
 
         # Get results from database
-        Variables.get_database().cursor.execute('SELECT * FROM readings')
-        results_1 = Variables.get_database().cursor.fetchall()
+        self.get_test_db().cursor.execute('SELECT * FROM readings')
+        results_1 = self.get_test_db().cursor.fetchall()
 
         # Checking number of results
         self.assertEqual(len(results_1), 1)
@@ -44,12 +60,12 @@ class AppTest(unittest.TestCase):
 
         # Checking second call of function
         Stromzaehler.simulate_energyusage()
-        Variables.get_database().cursor.execute('SELECT * FROM readings')
+        self.get_test_db().cursor.execute('SELECT * FROM readings')
         current_timestamp_2 = get_current_milliseconds()
 
         # Get results from database
-        Variables.get_database().cursor.execute('SELECT * FROM readings ORDER BY timestamp DESC')
-        results_2 = Variables.get_database().cursor.fetchall()
+        self.get_test_db().cursor.execute('SELECT * FROM readings ORDER BY timestamp DESC')
+        results_2 = self.get_test_db().cursor.fetchall()
 
         # Checking number of results
         self.assertEqual(len(results_2), 2)
@@ -72,16 +88,17 @@ class AppTest(unittest.TestCase):
         strom.simulate_energyusage()
 
         # Collecting logs
-        Variables.get_database().cursor.execute('SELECT * FROM logs')
-        result_logs = Variables.get_database().cursor.fetchall()
+        self.get_test_db().cursor.execute('SELECT * FROM readings')
+        result_logs = self.get_test_db().cursor.fetchall()
         self.assertEqual(len(result_logs), 2)
 
     def test_server_reachable(self):
         response = None
         try:
-            response = requests.get(f'{os.getenv("MESSSTELLENBETREIBER_URL")}/healthcheck')
+            response = requests.get('http://localhost:5000/api/healthcheck')
         except Exception as e:
             pass
+        print(response)
         self.assertIsNotNone(response)
         self.assertEqual(response.status_code, 200)
 

@@ -51,7 +51,12 @@ class AppTest(unittest.TestCase):
         return 'Bearer ' + jwt.encode(jwt_data, private_key, "EdDSA", headers={'crv': 'Ed25519'})
 
     def test_healthcheck(self):
-        response = requests.get("http://localhost:5000/api/healthcheck")
+        response = None
+        try:
+            response = requests.get("http://localhost:5000/api/healthcheck")
+        except Exception as e:
+            pass
+        self.assertIsNotNone(response)
         self.assertEqual(response.status_code, 200)
 
     def test_body_checksum(self):
@@ -61,10 +66,15 @@ class AppTest(unittest.TestCase):
         body2 = {
             'a': 'b2'
         }
-        response = requests.post('http://localhost:5000/api/stromzaehler/register', data=json.dumps(body), headers={
-            'Authorization': self.generate_kundenportal_jwt(json.dumps(body2)),
-            'Content-Type': 'application/json'
-        })
+        response = None
+        try:
+            response = requests.post('http://localhost:5000/api/stromzaehler/register', data=json.dumps(body), headers={
+                'Authorization': self.generate_kundenportal_jwt(json.dumps(body2)),
+                'Content-Type': 'application/json'
+            })
+        except Exception as e:
+            pass
+        self.assertIsNotNone(response)
         self.assertEqual(response.status_code, 401)
 
     def test_body_jwt_broken(self):
@@ -72,10 +82,15 @@ class AppTest(unittest.TestCase):
             'a': 'b'
         }
         body_json = json.dumps(body)
-        response = requests.post('http://localhost:5000/api/stromzaehler/register', data=body_json, headers={
-            'Authorization': f"{self.generate_kundenportal_jwt(body_json)}a",
-            'Content-Type': 'application/json'
-        })
+        response = None
+        try:
+            response = requests.post('http://localhost:5000/api/stromzaehler/register', data=body_json, headers={
+                'Authorization': f"{self.generate_kundenportal_jwt(body_json)}a",
+                'Content-Type': 'application/json'
+            })
+        except Exception as e:
+            pass
+        self.assertIsNotNone(response)
         self.assertEqual(response.status_code, 401)
 
     def test_body_jwt_wrong_key(self):
@@ -83,10 +98,15 @@ class AppTest(unittest.TestCase):
             'a': 'b'
         }
         body_json = json.dumps(body)
-        response = requests.post('http://localhost:5000/api/stromzaehler/register', data=body_json, headers={
-            'Authorization': f"{self.generate_kundenportal_jwt(body_json, 'messstellenbetreiber')}",
-            'Content-Type': 'application/json'
-        })
+        response = None
+        try:
+            response = requests.post('http://localhost:5000/api/stromzaehler/register', data=body_json, headers={
+                'Authorization': f"{self.generate_kundenportal_jwt(body_json, 'messstellenbetreiber')}",
+                'Content-Type': 'application/json'
+            })
+        except Exception as e:
+            pass
+        self.assertIsNotNone(response)
         self.assertEqual(response.status_code, 401)
 
     def test_body_jwt_unset(self):
@@ -94,9 +114,14 @@ class AppTest(unittest.TestCase):
             'a': 'b'
         }
         body_json = json.dumps(body)
-        response = requests.post('http://localhost:5000/api/stromzaehler/register', data=body_json, headers={
-            'Content-Type': 'application/json'
-        })
+        response = None
+        try:
+            response = requests.post('http://localhost:5000/api/stromzaehler/register', data=body_json, headers={
+                'Content-Type': 'application/json'
+            })
+        except Exception as e:
+            pass
+        self.assertIsNotNone(response)
         self.assertEqual(response.status_code, 401)
 
     def test_register_stromzaehler(self):
@@ -118,10 +143,15 @@ class AppTest(unittest.TestCase):
             }
         }
         body_json = json.dumps(body)
-        response = requests.post('http://localhost:5000/api/stromzaehler/register', data=body_json, headers={
-            'Authorization': self.generate_kundenportal_jwt(body_json),
-            'Content-Type': 'application/json'
-        })
+        response = None
+        try:
+            response = requests.post('http://localhost:5000/api/stromzaehler/register', data=body_json, headers={
+                'Authorization': self.generate_kundenportal_jwt(body_json),
+                'Content-Type': 'application/json'
+            })
+        except Exception as e:
+            pass
+        self.assertIsNotNone(response)
         self.assertEqual(response.status_code, 200)
         with Session(Variables.get_database().get_engin()) as session:
             statement = select(Stromzaehler).where(Stromzaehler.id == 1)
