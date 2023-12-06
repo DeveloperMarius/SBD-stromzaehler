@@ -32,15 +32,20 @@ class AppTest(unittest.TestCase):
         print("\nClosing Flask Server...")
         os.killpg(os.getpgid(self.flask_server.pid), signal.SIGTERM)
 
-    def generate_kundenportal_jwt(self, body):
+    def generate_kundenportal_jwt(self, body, key_source='kundenportal'):
         jwt_data = {
             'type': 'kundenportal',
             'id': 1,
             'mode': "SHA256",
             'signature': hashlib.sha256(body.encode('utf-8')).hexdigest()
         }
-        values = dotenv_values(f"{os.path.dirname(os.path.realpath(__file__))}/../../smart-meter-kundenportal/.env")
-        key = values['SECRET_PRIVATE_KEY'].replace('\\n', '\n')
+        if key_source == 'kundenportal':
+            values = dotenv_values(f"{os.path.dirname(os.path.realpath(__file__))}/../../smart-meter-kundenportal/.env")
+            key = values['SECRET_PRIVATE_KEY'].replace('\\n', '\n')
+        elif key_source == 'messstellenbetreiber':
+            key = os.getenv('PRIVATE_KEY').replace('\\n', '\n')
+        else:
+            return None
         private_key = serialization.load_pem_private_key(key.encode(), password=None)
 
         return 'Bearer ' + jwt.encode(jwt_data, private_key, "EdDSA", headers={'crv': 'Ed25519'})
@@ -48,6 +53,51 @@ class AppTest(unittest.TestCase):
     def test_healthcheck(self):
         response = requests.get("http://localhost:5000/api/healthcheck")
         self.assertEqual(response.status_code, 200)
+
+    def test_body_checksum(self):
+        body = {
+            'a': 'b'
+        }
+        body2 = {
+            'a': 'b2'
+        }
+        response = requests.post('http://localhost:5000/api/stromzaehler/register', data=json.dumps(body), headers={
+            'Authorization': self.generate_kundenportal_jwt(json.dumps(body2)),
+            'Content-Type': 'application/json'
+        })
+        self.assertEqual(response.status_code, 401)
+
+    def test_body_jwt_broken(self):
+        body = {
+            'a': 'b'
+        }
+        body_json = json.dumps(body)
+        response = requests.post('http://localhost:5000/api/stromzaehler/register', data=body_json, headers={
+            'Authorization': f"{self.generate_kundenportal_jwt(body_json)}a",
+            'Content-Type': 'application/json'
+        })
+        self.assertEqual(response.status_code, 401)
+
+    def test_body_jwt_wrong_key(self):
+        body = {
+            'a': 'b'
+        }
+        body_json = json.dumps(body)
+        response = requests.post('http://localhost:5000/api/stromzaehler/register', data=body_json, headers={
+            'Authorization': f"{self.generate_kundenportal_jwt(body_json, 'messstellenbetreiber')}",
+            'Content-Type': 'application/json'
+        })
+        self.assertEqual(response.status_code, 401)
+
+    def test_body_jwt_unset(self):
+        body = {
+            'a': 'b'
+        }
+        body_json = json.dumps(body)
+        response = requests.post('http://localhost:5000/api/stromzaehler/register', data=body_json, headers={
+            'Content-Type': 'application/json'
+        })
+        self.assertEqual(response.status_code, 401)
 
     def test_register_stromzaehler(self):
         body = {

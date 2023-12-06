@@ -77,8 +77,11 @@ def get_jwt_from_request(request, entity_type):
     if not is_jwt_in_request(request):
         return None
 
-    token = request.headers["Authorization"].split(" ")[1]
-    jwt_data = jwt.decode(token, options={"verify_signature": False})
+    token = request.headers["Authorization"].split(" ")[-1]
+    try:
+        jwt_data = jwt.decode(token, options={"verify_signature": False})
+    except Exception as e:
+        return None
 
     if jwt_data is None or jwt_data['type'] is None or jwt_data['id'] is None:
         return None
@@ -108,8 +111,8 @@ def get_jwt_from_request(request, entity_type):
         key = serialization.load_pem_public_key((public_key.encode()))
         data = jwt.decode(token, key, algorithms=['EdDSA'])
     except Exception as e:
-        exc_type, exc_obj, exc_tb = sys.exc_info()
-        print(f'{exc_type}: {str(e)} - {traceback.format_exc()}')
+        #exc_type, exc_obj, exc_tb = sys.exc_info()
+        #print(f'{exc_type}: {str(e)} - {traceback.format_exc()}')
         return None
 
     if is_body_signature_valid(request, data):
