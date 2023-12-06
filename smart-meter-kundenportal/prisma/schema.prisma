@@ -1,0 +1,56 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "./generated/client"
+}
+
+datasource db {
+  // provider = "sqlite"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String @id @default(uuid())
+  email    String @unique
+  vorname  String
+  nachname String
+  password String
+
+  telefon String
+  strasse String
+  hausnr  String
+  plz     String
+  ort     String
+
+  contract Contract[]
+}
+
+model Contract {
+  id        String   @id @default(uuid())
+  name      String
+  startDate DateTime @default(now())
+  endDate   DateTime
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+
+  strasse String
+  hausnr  String
+  plz     String
+  ort     String
+
+  iban String
+  blz  String
+
+  powermeter Powermeter[]
+}
+
+model Powermeter {
+  id         String    @id @default(uuid())
+  Contract   Contract? @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  contractId String?
+
+  powermeterStart Int
+}
