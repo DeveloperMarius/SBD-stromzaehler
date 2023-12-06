@@ -11,25 +11,12 @@ Token must be signed with EdDSA (Ed25519) using the provided private key and sho
 
 ## Endpoints
 
-### /api/landlord
-pass address and get landlord
-
-### /api/stromzaehler
-pass address get 
-
-- aktuelle messwerte
-- preis pro kwh + history (von bis)
-- stromzahler registrieren
-
 ### GET /api/healthcheck
-Der Endpunkt dient zum Überprüfen, ob das Messstellenbetreiberportal online und
-erreichbar ist.
-
+Endpoint for cheching if Messstellenbetreiberportal is online and reachable.  
 Expected status code: 200
 
 ### POST /api/stromzaehler/update
-Dieser Endpunkt wird vom Stromzähler genutzt, um den aktuellen Stromzählerstand
-zu senden.
+Endpoint for sending readings to Messstellenbetreiber. Used by Stromzähler.
 
 #### Request
 ```json
@@ -40,7 +27,7 @@ zu senden.
 ```
 
 ### GET /api/stromzaehler/history
-Dieser Endpunkt wird vom Kundenportal genutzt, um die Zählerstände von einem Stromzähler in einem bestimmten Zeitraum abzufragen.
+Endpoint du get readings of a stromzaehler in a period of time. Used by Kundenportal.
 #### Request
 ```json
 {
@@ -62,14 +49,49 @@ Dieser Endpunkt wird vom Kundenportal genutzt, um die Zählerstände von einem S
 }
 ```
 
+### POST /api/stromzaehler/history
+Endpoint to register a new stromzaehler. Used by Kundenportal.
+#### Request
+```json
+{
+    "id": 1,
+    "person": {
+        "first_name": "Max",
+        "last_name": "Mustermann",
+        "gender": 1,
+        "phone": "+49...",
+        "email": "max@mustermann.de"
+    },
+    "address": {
+        "street": "Musterstraße",
+        "plz": 12345,
+        "city": "Musterstadt",
+        "state": "NRW",
+        "country": "Germany"
+    }
+}
+```
+`"id"` of the stromzaehler to be registered
+#### Response
+```json
+{
+"success": true,
+"stromzaehler_id": 1,
+"owner_id": 2,
+"address_id": 4
+}
+```
+
 ## Objects
 
 ### JwtToken
 Id is the stromzaehler-id  
 Mode is the used hash algorithm for the signature. Should be `SHA256`.  
-Signature is the hash of the request body as hex integer
+Signature is the hash of the request body as hex integer.  
+Type must be either `"kundenportal"` or `"stromzaehler`"
 ```json
 {
+  "type": String,
   "id": Integer,
   "mode": String,
   "signature": Integer

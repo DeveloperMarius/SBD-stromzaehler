@@ -5,6 +5,7 @@ from datetime import datetime
 from models import StromzaehlerLog, StromzaehlerReading, Stromzaehler, Person, Address
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+import pytz
 
 api_routes_blueprint = Blueprint('API Routes', __name__)
 
@@ -16,6 +17,7 @@ def healthcheck():
     }), 200
 
 
+# todo check if stromzaehler stand is valid. (value größer als letzter value)
 @api_routes_blueprint.route('/stromzaehler/update', methods=['POST'])
 @token_required('stromzaehler')
 def stromzaehler_update(stromzaehler):
@@ -62,7 +64,7 @@ def get_stromzaehler_history(stromzaehler):
     data = request.json
     try:
         start_date = round(datetime.strptime(data['start_date'], '%Y-%m-%d').timestamp() * 1000)
-        end_date = round(datetime.strptime(data['end_date'], '%Y-%m-%d').timestamp() * 1000)
+        end_date = round(datetime.strptime(data['end_date'], '%Y-%m-%d').timestamp() * 1000) + 86400000  # + one_day
         stromzaehler_id = data['stromzaehler_id']
     except Exception as e:
         print(f"Unprocessable Entity: {e}")
@@ -80,7 +82,7 @@ def get_stromzaehler_history(stromzaehler):
     readings = []
     for i in raw_readings:
         reading = {
-            "stromzaehler_id": i.stromzaehler,
+            "id": i.source_id,
             "timestamp": i.timestamp,
             "value": i.value
         }
