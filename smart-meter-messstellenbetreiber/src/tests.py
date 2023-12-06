@@ -1,5 +1,4 @@
 import subprocess
-import threading
 import unittest
 import requests
 from dotenv import load_dotenv
@@ -21,7 +20,7 @@ class AppTest(unittest.TestCase):
     def tearDownClass(self):
         os.killpg(os.getpgid(self.flask_server.pid), signal.SIGTERM)
 
-    def test_a(self):
+    def test_healthcheck(self):
         response = requests.get("http://localhost:5000/api/healthcheck")
         self.assertEqual(response.status_code, 200)
 
