@@ -15,7 +15,7 @@ class AppTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(self):
-        load_dotenv()
+        load_dotenv(f"{os.path.dirname(os.path.realpath(__file__))}/../res/.env")
 
     def test_simulate_energyusage(self):
         # Running function to test
@@ -79,7 +79,7 @@ class AppTest(unittest.TestCase):
     def test_server_reachable(self):
         response = None
         try:
-            response = requests.get(f'{os.getenv("URL")}{"/healthcheck"}')
+            response = requests.get(f'{os.getenv("MESSSTELLENBETREIBER_URL")}/healthcheck')
         except Exception as e:
             pass
         self.assertIsNotNone(response)
