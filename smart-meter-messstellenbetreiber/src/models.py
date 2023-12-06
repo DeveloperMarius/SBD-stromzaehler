@@ -25,7 +25,6 @@ class EventHandler:
     @staticmethod
     def _validate(data, columns):
         for column in columns:
-            print(column)
             if column.name not in data:
                 continue
             value = data[column.name]
@@ -79,8 +78,8 @@ class Person(Base):
     firstname: Mapped[str] = mapped_column(String(200))
     lastname: Mapped[str] = mapped_column(String(200))
     gender: Mapped[int] = mapped_column(Integer())
-    phone: Mapped[str] = mapped_column(String(200))
-    email: Mapped[str] = mapped_column(String(200))
+    phone: Mapped[str] = mapped_column(String(200), nullable=True)
+    email: Mapped[str] = mapped_column(String(200), nullable=True)
 
     def __repr__(self) -> str:
         return f"Person(id={self.id!r})"
