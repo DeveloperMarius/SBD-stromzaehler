@@ -11,10 +11,12 @@ openssl pkey -in /tmp/key-private.pem -pubout -out /tmp/key-public.pem
 public_key=$(sed ':a;N;$!ba;s/\n/\\n/g' /tmp/key-public.pem)
 private_key=$(sed ':a;N;$!ba;s/\n/\\n/g' /tmp/key-private.pem)
 rm -rf /tmp/key-*
-cat > ./smart-meter-kundeportal/res/.env <<EOT
+cat > ./smart-meter-kundenportal/res/.env <<EOT
+KUNDENPORTAL_ID=1
 SECRET_PUBLIC_KEY=$public_key
 SECRET_PRIVATE_KEY=$private_key
 EOT
+sqlite3 smart-meter-messstellenbetreiber/res/database.db "INSERT INTO kundenportal VALUES (1, 'http://host.docker.internal:9001', '$public_key')"
 
 # Messstellenbetreiber
 rm -rf /tmp/key-*
