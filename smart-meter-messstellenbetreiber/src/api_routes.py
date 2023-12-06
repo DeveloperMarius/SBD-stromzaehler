@@ -9,16 +9,6 @@ from sqlalchemy.orm import Session
 api_routes_blueprint = Blueprint('API Routes', __name__)
 
 
-@api_routes_blueprint.route("/test")
-@token_required
-def test():
-    # request.json
-    return jsonify({
-        "message": "successfully retrieved user profile",
-        "data": "a"
-    })
-
-
 @api_routes_blueprint.route('/healthcheck')
 def healthcheck():
     return jsonify({
@@ -27,7 +17,7 @@ def healthcheck():
 
 
 @api_routes_blueprint.route('/stromzaehler/update', methods=['POST'])
-@token_required
+@token_required('stromzaehler')
 def stromzaehler_update(stromzaehler):
     data = request.json
 
@@ -50,7 +40,7 @@ def stromzaehler_update(stromzaehler):
         last_log = session.scalar(statement)
         logs = []
         for log in data['logs']:
-            if last_log is not None and log['id'] <= last_log['source_id']:
+            if last_log is not None and log['id'] <= last_log.source_id:
                 continue
             logs.append(StromzaehlerLog(
                 stromzaehler=stromzaehler,
@@ -67,7 +57,7 @@ def stromzaehler_update(stromzaehler):
 
 
 @api_routes_blueprint.route('/stromzaehler/history', methods=['GET'])
-@token_required
+@token_required('kundenportal')
 def get_stromzaehler_history(stromzaehler):
     data = request.json
     try:
@@ -105,7 +95,7 @@ def get_stromzaehler_history(stromzaehler):
 
 
 @api_routes_blueprint.route('/stromzaehler/register', methods=['POST'])
-@token_required
+@token_required('kundenportal')
 def register_stromzaehler(stromzaehler):
     data = request.json
     try:

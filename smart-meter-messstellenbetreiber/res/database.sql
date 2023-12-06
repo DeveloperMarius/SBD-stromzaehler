@@ -3,7 +3,8 @@ CREATE TABLE IF NOT EXISTS 'logs'(
     'timestamp' BIGINT NOT NULL,
     'endpoint' VARCHAR(200) NOT NULL,
     'method' VARCHAR(10) NOT NULL,
-    'jwt_id' VARCHAR(200) NULL DEFAULT NULL,
+    'source_type' VARCHAR(200) NULL DEFAULT NULL,
+    'source_id' INTEGER NULL DEFAULT NULL,
     'message' TEXT
 );
 

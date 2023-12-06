@@ -50,7 +50,8 @@ class Log(Base):
     timestamp: Mapped[int] = mapped_column(BigInteger())
     endpoint: Mapped[str] = mapped_column(String(200))
     method: Mapped[str] = mapped_column(String(10))
-    jwt_id: Mapped[str] = mapped_column(String(200), nullable=True)
+    source_type: Mapped[str] = mapped_column(String(200), nullable=True)
+    source_id: Mapped[int] = mapped_column(Integer(), nullable=True)
     message: Mapped[str] = mapped_column(String(3000))
 
     def __repr__(self) -> str:

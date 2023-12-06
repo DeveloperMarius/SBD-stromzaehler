@@ -3,7 +3,6 @@ import jwt
 import os
 import time
 from models import Stromzaehler, Log, Kundenportal
-from datetime import datetime
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 from sqlalchemy import select
@@ -14,8 +13,10 @@ import hashlib
 import sys
 import traceback
 
+
 def get_current_milliseconds():
     return round(time.time() * 1000)
+
 
 class Variables:
     db_instance = None
@@ -45,15 +46,14 @@ class Database:
 
 class Logger:
     @staticmethod
-    def log(request, message, jwt_id=None):
+    def log(request, message, source_type=None, source_id=None):
         logging.debug(f"{request.method} {request.path}: {message}")
-        # data = (datetime.now(), request.path, request.method, jwt_id, message)
-        # self.database.cursor.execute('INSERT INTO logs ("timestamp", "endpoint", "method", "jwt_id", "message") VALUES (?, ?, ?, ?, ?)', data)
         log = Log(
             timestamp=get_current_milliseconds(),
             endpoint=request.path,
             method=request.method,
-            jwt_id=jwt_id,
+            source_type=source_type,
+            source_id=source_id,
             message=message
         )
         with Session(Variables.get_database().get_engin()) as session:
@@ -73,7 +73,7 @@ def is_body_signature_valid(request, jwt_body) -> bool:
     return actual_hash == jwt_body['signature']
 
 
-def get_jwt_from_request(request):
+def get_jwt_from_request(request, entity_type):
     if not is_jwt_in_request(request):
         return None
 
@@ -83,15 +83,21 @@ def get_jwt_from_request(request):
     if jwt_data is None or jwt_data['type'] is None or jwt_data['id'] is None:
         return None
 
-    if jwt_data['type'] == 'stromzaehler':
-        statement = select(Stromzaehler.public_key).where(Stromzaehler.id == jwt_data['id'])
+    if entity_type == 'stromzaehler':
+        if jwt_data['type'] == 'stromzaehler':
+            statement = select(Stromzaehler.public_key).where(Stromzaehler.id == jwt_data['id'])
 
-        with Session(Variables.get_database().get_engin()) as session:
-            public_key = session.scalar(statement).replace('\\n', '\n')
-    elif jwt_data['type'] == 'kundenportal':
-        statement = select(Kundenportal.public_key).where(Kundenportal.id == jwt_data['id'])
-        with Session(Variables.get_database().get_engin()) as session:
-            public_key = session.scalar(statement).replace('\\n', '\n')
+            with Session(Variables.get_database().get_engin()) as session:
+                public_key = session.scalar(statement).replace('\\n', '\n')
+        else:
+            return None
+    elif entity_type == 'kundenportal':
+        if jwt_data['type'] == 'kundenportal':
+            statement = select(Kundenportal.public_key).where(Kundenportal.id == jwt_data['id'])
+            with Session(Variables.get_database().get_engin()) as session:
+                public_key = session.scalar(statement).replace('\\n', '\n')
+        else:
+            return None
     else:
         return None
 
