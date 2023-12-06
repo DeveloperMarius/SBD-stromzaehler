@@ -62,6 +62,39 @@ Dieser Endpunkt wird vom Kundenportal genutzt, um die Zählerstände von einem S
 }
 ```
 
+### POST /api/stromzaehler/history
+Dieser Endpunkt dient dazu einen neune Stromzaehler zu registrieren. Er kann vom Kundenportal genutzt werden.
+#### Request
+```json
+{
+    "id": 1,
+    "person": {
+        "first_name": "Max",
+        "last_name": "Mustermann",
+        "gender": 1,
+        "phone": "+49...",
+        "email": "max@mustermann.de"
+    },
+    "address": {
+        "street": "Musterstraße",
+        "plz": 12345,
+        "city": "Musterstadt",
+        "state": "NRW",
+        "country": "Germany"
+    }
+}
+```
+`"id"` ist die id des Stromzählers, der registriert werden soll.
+#### Response
+```json
+{
+"success": true,
+"stromzaehler_id": 1,
+"owner_id": 2,
+"address_id": 4
+}
+```
+
 ## Objects
 
 ### JwtToken
