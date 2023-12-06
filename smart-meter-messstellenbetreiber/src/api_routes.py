@@ -16,6 +16,7 @@ def healthcheck():
     }), 200
 
 
+# todo check if stromzaehler stand is valid. (value größer als letzter value)
 @api_routes_blueprint.route('/stromzaehler/update', methods=['POST'])
 @token_required('stromzaehler')
 def stromzaehler_update(stromzaehler):
@@ -80,7 +81,7 @@ def get_stromzaehler_history(stromzaehler):
     readings = []
     for i in raw_readings:
         reading = {
-            "stromzaehler_id": i.stromzaehler,
+            "id": i.source_id,
             "timestamp": i.timestamp,
             "value": i.value
         }
