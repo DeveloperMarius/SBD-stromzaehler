@@ -16,6 +16,7 @@ import sys
 from utils import Variables, get_current_milliseconds
 import json
 from datetime import datetime
+import pytz
 
 
 class AppTest(unittest.TestCase):
@@ -38,8 +39,22 @@ class AppTest(unittest.TestCase):
         #sys.stdout.close()
         #sys.stdout = save_stdout
 
+    @staticmethod
+    def generate_stromzaehler_jwt(body):
+        jwt_data = {
+            'type': 'stromzaehler',
+            'id': 1,
+            'mode': "SHA256",
+            'signature': hashlib.sha256(body.encode('utf-8')).hexdigest()
+        }
+        values = dotenv_values(f"{os.path.dirname(os.path.realpath(__file__))}/../../smart-meter-stromzaehler/generated/.env-1")
+        key = values['PRIVATE_KEY'].replace('\\n', '\n')
+        private_key = serialization.load_pem_private_key(key.encode(), password=None)
 
-    def generate_kundenportal_jwt(self, body):
+        return 'Bearer ' + jwt.encode(jwt_data, private_key, "EdDSA", headers={'crv': 'Ed25519'})
+
+    @staticmethod
+    def generate_kundenportal_jwt(body):
         jwt_data = {
             'type': 'kundenportal',
             'id': 1,
@@ -83,16 +98,15 @@ class AppTest(unittest.TestCase):
         with Session(Variables.get_database().get_engin()) as session:
             statement = select(Stromzaehler).where(Stromzaehler.id == 1)
             response = session.scalar(statement)
-            #self.assertEqual(response.owner.first_name, body['person']['first_name'])
-            #self.assertEqual(response.address.street, body['address']['street'])
-            #print(response)
 
     def test_stromzaehler_update_and_history(self):
         # Testing stromzaehler_update
+        local_tz = pytz.timezone('Europe/Berlin')
+
         stromzaehler_id = 1
-        timestamp_1 = 1701876222272
-        timestamp_2 = 1701876242272
-        timestamp_3 = 1701876242274
+        timestamp_1 = 1701385200000
+        timestamp_2 = 1701471600000
+        timestamp_3 = 1701471600000
 
         readings = [
             {
@@ -117,23 +131,23 @@ class AppTest(unittest.TestCase):
             "logs": []
         })
         update_response = requests.post('http://localhost:5000/api/stromzaehler/update',
-                                        headers={"Authorization": self.get_jwt(), 'Content-Type': 'application/json'},
+                                        headers={"Authorization": AppTest.generate_stromzaehler_jwt(update_body), 'Content-Type': 'application/json'},
                                         data=update_body)
         self.assertEquals(update_response.status_code, 200)
-        self.assertEquals(update_response.json, {"success": True})
+        self.assertEquals(update_response.json(), {"success": True})
 
         # Testing stromzaehler history
         history1_body = json.dumps({
             "stromzaehler_id": stromzaehler_id,
-            "start_date": datetime.fromtimestamp(timestamp_1 / 1000.0).date().strftime('%Y-%m-%d'),
+            "start_date": local_tz.localize(datetime.fromtimestamp(timestamp_1 / 1000.0)).date().strftime('%Y-%m-%d'),
             "end_date": datetime.fromtimestamp(timestamp_2 / 1000.0).date().strftime('%Y-%m-%d')
         })
         history1_response = requests.get('http://localhost:5000/api/stromzaehler/history',
-                                         headers={"Authorization": self.get_jwt(), 'Content-Type': 'application/json'},
+                                         headers={"Authorization": AppTest.generate_kundenportal_jwt(history1_body), 'Content-Type': 'application/json'},
                                          data=history1_body)
 
         self.assertEquals(history1_response.status_code, 200)
-        self.assertEquals(history1_response.json, readings)
+        self.assertEquals(history1_response.json(), readings)
 
         history2_body = json.dumps({
             "stromzaehler_id": stromzaehler_id,
@@ -141,11 +155,11 @@ class AppTest(unittest.TestCase):
             "end_date": datetime.fromtimestamp((timestamp_1 - 2) / 1000.0).date().strftime('%Y-%m-%d')
         })
         history2_response = requests.get('http://localhost:5000/api/stromzaehler/history',
-                                         headers={"Authorization": self.get_jwt(), 'Content-Type': 'application/json'},
+                                         headers={"Authorization": AppTest.generate_kundenportal_jwt(history2_body), 'Content-Type': 'application/json'},
                                          data=history2_body)
 
         self.assertEquals(history2_response.status_code, 200)
-        self.assertEquals(history2_response.json, {"readings": []})
+        self.assertEquals(history2_response.json(), {"readings": []})
 
         history3_body = json.dumps({
             "stromzaehler_id": stromzaehler_id,
@@ -153,11 +167,11 @@ class AppTest(unittest.TestCase):
             "end_date": datetime.fromtimestamp((timestamp_2 + 1) / 1000.0).date().strftime('%Y-%m-%d')
         })
         history3_response = requests.get('http://localhost:5000/api/stromzaehler/history',
-                                         headers={"Authorization": self.get_jwt(), 'Content-Type': 'application/json'},
+                                         headers={"Authorization": AppTest.generate_kundenportal_jwt(history3_body), 'Content-Type': 'application/json'},
                                          data=history3_body)
 
         self.assertEquals(history3_response.status_code, 200)
-        self.assertEquals(history3_response.json, {"readings": [readings[1]]})
+        self.assertEquals(history3_response.json(), {"readings": [readings[1]]})
 
 
 if __name__ == '__main__':
