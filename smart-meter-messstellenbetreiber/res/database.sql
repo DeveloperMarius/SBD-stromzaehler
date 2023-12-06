@@ -23,8 +23,8 @@ CREATE TABLE IF NOT EXISTS 'persons'(
     'firstname' VARCHAR(200) NOT NULL,
     'lastname' VARCHAR(200) NOT NULL,
     'gender' INTEGER,
-    'phone' VARCHAR(200),
-    'email' VARCHAR(200)
+    'phone' VARCHAR(200) NULL DEFAULT NULL,
+    'email' VARCHAR(200) NULL DEFAULT NULL
 );
 
 CREATE TABLE IF NOT EXISTS 'stromzaehler'(

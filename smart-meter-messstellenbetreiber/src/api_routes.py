@@ -174,12 +174,12 @@ def register_stromzaehler(stromzaehler):
         stromzaehler[0].owner = own_id
         session.commit()
 
-    body = {
-        'success': True,
-        'stromzaehler_id': stromzaehler[0].id,
-        'owner_id': own_id,
-        'address_id': add_id
-    }
+        body = {
+            'success': True,
+            'stromzaehler_id': stromzaehler[0].id,
+            'owner_id': own_id,
+            'address_id': add_id
+        }
     return signing_response(body)
 
 
