@@ -22,20 +22,15 @@ class AppTest(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         load_dotenv(f"{os.path.dirname(os.path.realpath(__file__))}/../res/.env")
+        print("Starting Flask Server...")
         self.flask_server = subprocess.Popen(["python3", f"{os.path.dirname(os.path.realpath(__file__))}/app.py"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         sleep(5)
+        print("Started")
 
     @classmethod
     def tearDownClass(self):
-        #save_stdout = sys.stdout
-        #sys.stdout = open(r'/tmp/a')
-
+        print("\nClosing Flask Server...")
         os.killpg(os.getpgid(self.flask_server.pid), signal.SIGTERM)
-
-        # regain stdout to screen
-        #sys.stdout.close()
-        #sys.stdout = save_stdout
-
 
     def generate_kundenportal_jwt(self, body):
         jwt_data = {
@@ -58,8 +53,8 @@ class AppTest(unittest.TestCase):
         body = {
             'id': 1,
             'person': {
-                'first_name': f"Max{get_current_milliseconds()}",
-                'last_name': 'Musterfrau',
+                'firstname': f"Max{get_current_milliseconds()}",
+                'lastname': 'Musterfrau',
                 'gender': 1,
                 'phone': None,
                 'email': None
@@ -81,9 +76,8 @@ class AppTest(unittest.TestCase):
         with Session(Variables.get_database().get_engin()) as session:
             statement = select(Stromzaehler).where(Stromzaehler.id == 1)
             response = session.scalar(statement)
-            #self.assertEqual(response.owner.first_name, body['person']['first_name'])
-            #self.assertEqual(response.address.street, body['address']['street'])
-            #print(response)
+            self.assertEqual(response.owner_obj.firstname, body['person']['firstname'])
+            self.assertEqual(response.address_obj.street, body['address']['street'])
 
 
 if __name__ == '__main__':
