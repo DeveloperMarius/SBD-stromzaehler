@@ -1,0 +1,6 @@
+python-dotenv
+flask
+pyjwt
+sqlalchemy
+requests
+cryptography
