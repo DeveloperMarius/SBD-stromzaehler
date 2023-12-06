@@ -102,8 +102,8 @@ def register_stromzaehler(stromzaehler):
     data = request.json
     try:
         stromzaehler_id = data['id']
-        first_name = data['person']['first_name']
-        last_name = data['person']['last_name']
+        firstname = data['person']['firstname']
+        lastname = data['person']['lastname']
         gender = data['person']['gender'] if 'gender' in data['person'] else 0
         phone = data['person']['phone'] if 'phone' in data['person'] else None
         email = data['person']['email'] if 'email' in data['person'] else None
@@ -150,8 +150,8 @@ def register_stromzaehler(stromzaehler):
 
         # Check if owner exists
         statement = select(Person).where(
-            (Person.firstname == first_name) &
-            (Person.lastname == last_name) &
+            (Person.firstname == firstname) &
+            (Person.lastname == lastname) &
             (Person.gender == gender) &
             (Person.email == email)
         ).limit(1)
@@ -159,8 +159,8 @@ def register_stromzaehler(stromzaehler):
         own = response.fetchall()
         if len(own) == 0:
             new_own = Person(
-                firstname=first_name,
-                lastname=last_name,
+                firstname=firstname,
+                lastname=lastname,
                 gender=gender,
                 phone=phone,
                 email=email

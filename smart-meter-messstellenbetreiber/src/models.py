@@ -1,6 +1,8 @@
+from typing import List
+
 from sqlalchemy import ForeignKey
 from sqlalchemy import String
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, relationship
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.event import listens_for
@@ -92,6 +94,9 @@ class Stromzaehler(Base):
     address: Mapped[int] = mapped_column(Integer(), ForeignKey("addresses.id"))
     landlord: Mapped[int] = mapped_column(Integer(), ForeignKey("persons.id"))
     owner: Mapped[int] = mapped_column(Integer(), ForeignKey("persons.id"))
+    owner_obj: Mapped["Person"] = relationship(foreign_keys=[owner])
+    landlord_obj: Mapped["Person"] = relationship(foreign_keys=[landlord])
+    address_obj: Mapped["Address"] = relationship(foreign_keys=[address])
 
     def __repr__(self) -> str:
         return f"Stromzaehler(id={self.id!r})"

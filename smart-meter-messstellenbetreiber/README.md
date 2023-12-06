@@ -7,12 +7,12 @@
   "Authorization": Bearer token  
 }
 ```
-Token must be signed with HS256 and should contain the object `JwtToken`.
+Token must be signed with EdDSA (Ed25519) using the provided private key and should contain the object `JwtToken`.
 
 ## Endpoints
 
 ### /api/landlord
-pass adress and get landlord
+pass address and get landlord
 
 ### /api/stromzaehler
 pass address get 
@@ -99,7 +99,7 @@ Dieser Endpunkt dient dazu einen neune Stromzaehler zu registrieren. Er kann vom
 
 ### JwtToken
 Id is the stromzaehler-id  
-Mode is the used hash algorithm for the signature. Should be sha256.  
+Mode is the used hash algorithm for the signature. Should be `SHA256`.  
 Signature is the hash of the request body as hex integer
 ```json
 {

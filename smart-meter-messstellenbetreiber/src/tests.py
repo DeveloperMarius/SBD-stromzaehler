@@ -25,19 +25,15 @@ class AppTest(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         load_dotenv(f"{os.path.dirname(os.path.realpath(__file__))}/../res/.env")
+        print("Starting Flask Server...")
         self.flask_server = subprocess.Popen(["python3", f"{os.path.dirname(os.path.realpath(__file__))}/app.py"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         sleep(5)
+        print("Started")
 
     @classmethod
     def tearDownClass(self):
-        #save_stdout = sys.stdout
-        #sys.stdout = open(r'/tmp/a')
-
+        print("\nClosing Flask Server...")
         os.killpg(os.getpgid(self.flask_server.pid), signal.SIGTERM)
-
-        # regain stdout to screen
-        #sys.stdout.close()
-        #sys.stdout = save_stdout
 
     @staticmethod
     def generate_stromzaehler_jwt(body):
@@ -54,15 +50,20 @@ class AppTest(unittest.TestCase):
         return 'Bearer ' + jwt.encode(jwt_data, private_key, "EdDSA", headers={'crv': 'Ed25519'})
 
     @staticmethod
-    def generate_kundenportal_jwt(body):
+    def generate_kundenportal_jwt(body, key_source='kundenportal'):
         jwt_data = {
             'type': 'kundenportal',
             'id': 1,
             'mode': "SHA256",
             'signature': hashlib.sha256(body.encode('utf-8')).hexdigest()
         }
-        values = dotenv_values(f"{os.path.dirname(os.path.realpath(__file__))}/../../smart-meter-kundenportal/.env")
-        key = values['SECRET_PRIVATE_KEY'].replace('\\n', '\n')
+        if key_source == 'kundenportal':
+            values = dotenv_values(f"{os.path.dirname(os.path.realpath(__file__))}/../../smart-meter-kundenportal/.env")
+            key = values['SECRET_PRIVATE_KEY'].replace('\\n', '\n')
+        elif key_source == 'messstellenbetreiber':
+            key = os.getenv('PRIVATE_KEY').replace('\\n', '\n')
+        else:
+            return None
         private_key = serialization.load_pem_private_key(key.encode(), password=None)
 
         return 'Bearer ' + jwt.encode(jwt_data, private_key, "EdDSA", headers={'crv': 'Ed25519'})
@@ -71,12 +72,57 @@ class AppTest(unittest.TestCase):
         response = requests.get("http://localhost:5000/api/healthcheck")
         self.assertEqual(response.status_code, 200)
 
+    def test_body_checksum(self):
+        body = {
+            'a': 'b'
+        }
+        body2 = {
+            'a': 'b2'
+        }
+        response = requests.post('http://localhost:5000/api/stromzaehler/register', data=json.dumps(body), headers={
+            'Authorization': self.generate_kundenportal_jwt(json.dumps(body2)),
+            'Content-Type': 'application/json'
+        })
+        self.assertEqual(response.status_code, 401)
+
+    def test_body_jwt_broken(self):
+        body = {
+            'a': 'b'
+        }
+        body_json = json.dumps(body)
+        response = requests.post('http://localhost:5000/api/stromzaehler/register', data=body_json, headers={
+            'Authorization': f"{self.generate_kundenportal_jwt(body_json)}a",
+            'Content-Type': 'application/json'
+        })
+        self.assertEqual(response.status_code, 401)
+
+    def test_body_jwt_wrong_key(self):
+        body = {
+            'a': 'b'
+        }
+        body_json = json.dumps(body)
+        response = requests.post('http://localhost:5000/api/stromzaehler/register', data=body_json, headers={
+            'Authorization': f"{self.generate_kundenportal_jwt(body_json, 'messstellenbetreiber')}",
+            'Content-Type': 'application/json'
+        })
+        self.assertEqual(response.status_code, 401)
+
+    def test_body_jwt_unset(self):
+        body = {
+            'a': 'b'
+        }
+        body_json = json.dumps(body)
+        response = requests.post('http://localhost:5000/api/stromzaehler/register', data=body_json, headers={
+            'Content-Type': 'application/json'
+        })
+        self.assertEqual(response.status_code, 401)
+
     def test_register_stromzaehler(self):
         body = {
             'id': 1,
             'person': {
-                'first_name': f"Max{get_current_milliseconds()}",
-                'last_name': 'Musterfrau',
+                'firstname': f"Max{get_current_milliseconds()}",
+                'lastname': 'Musterfrau',
                 'gender': 1,
                 'phone': None,
                 'email': None
@@ -98,6 +144,8 @@ class AppTest(unittest.TestCase):
         with Session(Variables.get_database().get_engin()) as session:
             statement = select(Stromzaehler).where(Stromzaehler.id == 1)
             response = session.scalar(statement)
+            self.assertEqual(response.owner_obj.firstname, body['person']['firstname'])
+            self.assertEqual(response.address_obj.street, body['address']['street'])
 
     def test_stromzaehler_update_and_history(self):
         # Testing stromzaehler_update
@@ -131,7 +179,8 @@ class AppTest(unittest.TestCase):
             "logs": []
         })
         update_response = requests.post('http://localhost:5000/api/stromzaehler/update',
-                                        headers={"Authorization": AppTest.generate_stromzaehler_jwt(update_body), 'Content-Type': 'application/json'},
+                                        headers={"Authorization": AppTest.generate_stromzaehler_jwt(update_body),
+                                                 'Content-Type': 'application/json'},
                                         data=update_body)
         self.assertEquals(update_response.status_code, 200)
         self.assertEquals(update_response.json(), {"success": True})
@@ -143,7 +192,8 @@ class AppTest(unittest.TestCase):
             "end_date": datetime.fromtimestamp(timestamp_2 / 1000.0).date().strftime('%Y-%m-%d')
         })
         history1_response = requests.get('http://localhost:5000/api/stromzaehler/history',
-                                         headers={"Authorization": AppTest.generate_kundenportal_jwt(history1_body), 'Content-Type': 'application/json'},
+                                         headers={"Authorization": AppTest.generate_kundenportal_jwt(history1_body),
+                                                  'Content-Type': 'application/json'},
                                          data=history1_body)
 
         self.assertEquals(history1_response.status_code, 200)
@@ -155,7 +205,8 @@ class AppTest(unittest.TestCase):
             "end_date": datetime.fromtimestamp((timestamp_1 - 2) / 1000.0).date().strftime('%Y-%m-%d')
         })
         history2_response = requests.get('http://localhost:5000/api/stromzaehler/history',
-                                         headers={"Authorization": AppTest.generate_kundenportal_jwt(history2_body), 'Content-Type': 'application/json'},
+                                         headers={"Authorization": AppTest.generate_kundenportal_jwt(history2_body),
+                                                  'Content-Type': 'application/json'},
                                          data=history2_body)
 
         self.assertEquals(history2_response.status_code, 200)
@@ -167,7 +218,8 @@ class AppTest(unittest.TestCase):
             "end_date": datetime.fromtimestamp((timestamp_2 + 1) / 1000.0).date().strftime('%Y-%m-%d')
         })
         history3_response = requests.get('http://localhost:5000/api/stromzaehler/history',
-                                         headers={"Authorization": AppTest.generate_kundenportal_jwt(history3_body), 'Content-Type': 'application/json'},
+                                         headers={"Authorization": AppTest.generate_kundenportal_jwt(history3_body),
+                                                  'Content-Type': 'application/json'},
                                          data=history3_body)
 
         self.assertEquals(history3_response.status_code, 200)
