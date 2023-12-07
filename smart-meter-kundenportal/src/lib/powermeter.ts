@@ -141,7 +141,6 @@ export async function getPowermeterReadings(
 			});
 
 			const { readings } = await data.json();
-			console.log(readings);
 
 			powermeterReadings.push({
 				contract_id: contract.id,

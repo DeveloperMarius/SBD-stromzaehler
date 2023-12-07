@@ -105,8 +105,6 @@
 			});
 		});
 
-		console.log(dayValues);
-
 		return dayValues;
 	}
 
