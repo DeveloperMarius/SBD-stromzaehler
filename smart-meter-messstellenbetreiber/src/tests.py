@@ -4,15 +4,12 @@ import requests
 from dotenv import load_dotenv, dotenv_values
 import os
 from time import sleep
-import signal
-import json
 import hashlib
 from cryptography.hazmat.primitives import serialization
 import jwt
-from models import StromzaehlerLog, StromzaehlerReading, Stromzaehler, Person, Address
+from models import Stromzaehler
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-import sys
 from utils import Variables, get_current_milliseconds
 import json
 from datetime import datetime
@@ -23,17 +20,19 @@ class AppTest(unittest.TestCase):
     flask_server = None
 
     @classmethod
-    def setUpClass(self):
+    def setUpClass(cls):
         load_dotenv(f"{os.path.dirname(os.path.realpath(__file__))}/../res/.env")
         print("Starting Flask Server...")
-        self.flask_server = subprocess.Popen(["python3", f"{os.path.dirname(os.path.realpath(__file__))}/app.py"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        cls.flask_server = subprocess.Popen(["python3", f"{os.path.dirname(os.path.realpath(__file__))}/app.py"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         sleep(5)
         print("Started")
 
     @classmethod
-    def tearDownClass(self):
+    def tearDownClass(cls):
         print("\nClosing Flask Server...")
-        os.killpg(os.getpgid(self.flask_server.pid), signal.SIGTERM)
+        cls.flask_server.terminate()
+        cls.flask_server.wait()
+        print("Flask Server closed.")
 
     @staticmethod
     def generate_stromzaehler_jwt(body):

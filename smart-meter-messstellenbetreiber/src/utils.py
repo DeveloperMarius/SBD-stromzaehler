@@ -59,7 +59,7 @@ class Logger:
         with Session(Variables.get_database().get_engin()) as session:
             session.add(log)
             session.commit()
-        return log.id
+            return log.id
 
 
 def is_jwt_in_request(request):
@@ -142,7 +142,7 @@ def signing_response(body: dict):
     }
 
     jwt_token = 'Bearer ' + jwt.encode(jwt_data, get_private_rsa_key(), "EdDSA", headers={'crv': 'Ed25519'})
-
+    print(f"gen jwt: {jwt_token}")
     response.headers['Authorization'] = jwt_token
 
     return response
