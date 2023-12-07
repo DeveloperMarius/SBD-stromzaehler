@@ -42,7 +42,7 @@
 		<Card padding="xl" class="max-w-full">
 			<div class="flex justify-between items-center mb-4">
 				<h5 class="text-xl font-bold leading-none text-gray-900 dark:text-white">
-					{contract.name}
+					{contract.name} ({contract.powermeter[0].id})
 				</h5>
 				<p>
 					({dayjs(contract.startDate).format('DD.MM.YYYY')} - {dayjs(contract.endDate).format(
@@ -112,6 +112,10 @@
 
 	<form method="POST" action="?/create_contract" use:enhance>
 		<input type="hidden" name="user_id" value={user.id} />
+		<Label class="mb-4">
+			<span>Powermeter</span>
+			<Input type="text" name="powermeter_id" placeholder="3218732-32123312-321132312" required />
+		</Label>
 		<div class="grid gap-4 sm:grid-cols-2 sm:gap-6">
 			<Label class="space-y-2">
 				<span>Straße</span>

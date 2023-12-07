@@ -11,7 +11,7 @@
 	<meta name="robots" content="noindex" />
 </svelte:head>
 
-<div class="flex justify-center items-center min-h-screen p-10">
+<div class="flex justify-center items-center min-h-screen p-10 bg-slate-50">
 	<Section name="register" sectionClass="relative md:w-1/2 sm:3/4 w-11/12">
 		<Register href="/">
 			<div class="p-6 space-y-4 md:space-y-6 sm:p-8 w-">
@@ -63,22 +63,23 @@
 						</Label>
 					</div>
 					<div class="flex items-start">
-						<Checkbox
-							>Ich akzeptiere die <a
+						<Checkbox>
+							Ich akzeptiere die <a
 								class="font-medium text-primary-600 hover:underline dark:text-primary-500 ml-1"
 								href="/"
 							>
-								AGBs und Datenschutzrichtlinien</a
-							></Checkbox
-						>
+								AGBs und Datenschutzrichtlinien
+							</a>
+						</Checkbox>
 					</div>
 					<Button type="submit" class="w-full1">Account erstellen</Button>
 					<div class="text-sm font-medium text-gray-500 dark:text-gray-300">
 						Du hast bereits einen Account? <a
 							href="/auth/login"
 							class="font-medium text-primary-600 hover:underline dark:text-primary-500"
-							>Hier anmelden</a
 						>
+							Hier anmelden
+						</a>
 					</div>
 				</form>
 			</div>

@@ -75,6 +75,7 @@ def is_body_signature_valid(request, jwt_body) -> bool:
 
 
 def get_jwt_from_request(request, entity_type):
+    Logger.log(1)
     if not is_jwt_in_request(request):
         return None
 
@@ -83,9 +84,14 @@ def get_jwt_from_request(request, entity_type):
         jwt_data = jwt.decode(token, options={"verify_signature": False})
     except Exception as e:
         return None
+    Logger.log(2)
+    
 
     if jwt_data is None or jwt_data['type'] is None or jwt_data['id'] is None:
         return None
+
+    Logger.log(4)
+    
 
     if entity_type == 'stromzaehler':
         if jwt_data['type'] == 'stromzaehler':
@@ -104,9 +110,14 @@ def get_jwt_from_request(request, entity_type):
             return None
     else:
         return None
+    Logger.log(5)
+
 
     if public_key is None:
         return None
+
+    Logger.log(6)
+
 
     try:
         key = serialization.load_pem_public_key((public_key.encode()))
@@ -116,6 +127,8 @@ def get_jwt_from_request(request, entity_type):
         #print(f'{exc_type}: {str(e)} - {traceback.format_exc()}')
         return None
 
+    Logger.log(7)
+    
     if is_body_signature_valid(request, data):
         return data
     else:

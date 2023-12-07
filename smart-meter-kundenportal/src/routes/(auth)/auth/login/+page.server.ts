@@ -4,6 +4,7 @@ import { fail, type Actions, redirect } from '@sveltejs/kit';
 import type { ServerLoad } from '@sveltejs/kit';
 import jwt from 'jsonwebtoken';
 import z from 'zod';
+import bcrypt from 'bcrypt';
 
 export const load: ServerLoad = async ({ cookies }) => {
 	const token = cookies.get('token');
@@ -43,7 +44,7 @@ export const actions: Actions = {
 			}
 		});
 
-		if (!user || !(await Bun.password.verify(formUser.data.password, user.password))) {
+		if (!user || !(await bcrypt.compare(formUser.data.password, user.password))) {
 			return fail(400, {
 				error: 'Anmeldung fehlgeschlagen, bitte überprüfe deine Eingaben.'
 			});

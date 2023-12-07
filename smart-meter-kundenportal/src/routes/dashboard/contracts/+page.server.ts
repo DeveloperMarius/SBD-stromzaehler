@@ -64,8 +64,9 @@ export const actions: Actions = {
 			.safeParse(Object.fromEntries(formData));
 
 		const user = get_user_from_token(cookies.get('token'));
+		const powermeter_id = formData.get('powermeter_id')?.toString();
 
-		if (!user || !user.id || !newContract.success) {
+		if (!user || !user.id || !newContract.success || !powermeter_id) {
 			return fail(400, {
 				error: 'Fehler bei der Erstellung eines Vertrages. Überprüfe deine Eingaben.'
 			});
@@ -76,6 +77,12 @@ export const actions: Actions = {
 				error: 'Server Fehler: Bitte versuchen Sie es später erneut.'
 			});
 		}
+
+		if (!(await register_powermeter(powermeter_id, user)))
+			return fail(500, {
+				error:
+					'Server Fehler: Smart-Meter konnte nicht eingerichtet werden. Daten sind noch nicht verfügbar.'
+			});
 
 		const createdContract = await prisma.contract.create({
 			data: {
@@ -90,23 +97,6 @@ export const actions: Actions = {
 				}
 			}
 		});
-
-		const powermeter = await prisma.powermeter.create({
-			data: {
-				Contract: {
-					connect: {
-						id: createdContract.id
-					}
-				},
-				powermeterStart: 0
-			}
-		});
-
-		if (!(await register_powermeter(powermeter.id, user)))
-			return fail(500, {
-				error:
-					'Server Fehler: Smart-Meter konnte nicht eingerichtet werden. Daten sind noch nicht verfügbar.'
-			});
 
 		const contract = await prisma.contract.findFirst({
 			where: {
