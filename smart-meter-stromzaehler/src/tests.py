@@ -9,6 +9,10 @@ import signal
 import subprocess
 from time import sleep
 import os
+import json
+import hashlib
+from cryptography.hazmat.primitives import serialization
+import jwt
 
 
 class AppTest(unittest.TestCase):
@@ -24,7 +28,7 @@ class AppTest(unittest.TestCase):
     def setUpClass(self):
         load_dotenv(f"{os.path.dirname(os.path.realpath(__file__))}/../generated/.env-1")
         print("Starting Flask Server...")
-        self.flask_server = subprocess.Popen(["python3", f"{os.path.dirname(os.path.realpath(__file__))}/../../smart-meter-messstellenbetreiber/src/app.py"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        self.flask_server = subprocess.Popen(["python3", f"{os.path.dirname(os.path.realpath(__file__))}/../../smart-meter-messstellenbetreiber/src/app.py"])#, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         sleep(5)
         print("Started")
 
@@ -87,10 +91,56 @@ class AppTest(unittest.TestCase):
         strom.simulate_energyusage()
         strom.simulate_energyusage()
 
-        # Collecting logs
+        # Collecting readings
         self.get_test_db().cursor.execute('SELECT * FROM readings')
+        result_readings = self.get_test_db().cursor.fetchall()
+        self.assertEqual(len(result_readings), 2)
+
+        # Collecting Logs
+        self.get_test_db().cursor.execute('SELECT * FROM logs')
         result_logs = self.get_test_db().cursor.fetchall()
-        self.assertEqual(len(result_logs), 2)
+        self.assertEqual(len(result_logs), 0)
+
+        # Send data
+        body = json.dumps({
+            'readings': result_readings,
+            'logs': result_logs
+        })
+
+        jwt_data = {
+            'type': 'stromzaehler',
+            'id': int(os.getenv('STROMZAEHLER_ID')),
+            'mode': "SHA256",
+            'signature': hashlib.sha256(body.encode('utf-8')).hexdigest()
+        }
+
+        key = os.getenv('PRIVATE_KEY').replace('\\n', '\n')
+        private_key = serialization.load_pem_private_key(key.encode(), password=None)
+
+        jwt_token = 'Bearer ' + jwt.encode(jwt_data, private_key, "EdDSA", headers={'crv': 'Ed25519'})
+        response = requests.post('http://localhost:5000/api/stromzaehler/update', headers={'Authorization': jwt_token, 'Content-Type': 'application/json'}, data=body)
+
+        # Check response code
+        self.assertEqual(response.status_code, 200)
+
+        # Check response hash
+        print(response.headers)
+        token = response.headers["Authorization"].split(" ")[-1]
+        try:
+            key = serialization.load_pem_public_key((os.getenv('MESSSTELLENBETREIBER_PUBLIC_KEY').replace('\\n', '\n').encode()))
+            print(token)
+            print(key)
+            jwt_body = jwt.decode(token, key, algorithms=['EdDSA'])
+        except Exception as e:
+            print(e)
+        print(1)
+        print(jwt_body)
+        self.assertIn('mode', jwt_body)
+        self.assertEqual(jwt_body['mode'], 'SHA256')
+        self.assertIsNotNone(jwt_body['signature'], jwt_body)
+        print('2')
+        actual_hash = hashlib.sha256(response.json().encode('utf-8')).hexdigest()
+        self.assertEqual(actual_hash, jwt_body['signature'])
 
     def test_server_reachable(self):
         response = None
@@ -98,7 +148,6 @@ class AppTest(unittest.TestCase):
             response = requests.get('http://localhost:5000/api/healthcheck')
         except Exception as e:
             pass
-        print(response)
         self.assertIsNotNone(response)
         self.assertEqual(response.status_code, 200)
 

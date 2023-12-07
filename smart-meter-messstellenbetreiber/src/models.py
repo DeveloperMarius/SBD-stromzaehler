@@ -51,7 +51,7 @@ class Log(Base):
     method: Mapped[str] = mapped_column(String(10))
     source_type: Mapped[str] = mapped_column(String(200), nullable=True)
     source_id: Mapped[int] = mapped_column(Integer(), nullable=True)
-    message: Mapped[str] = mapped_column(String(3000))
+    message: Mapped[str] = mapped_column(String(30000))
 
     def __repr__(self) -> str:
         return f"Log(id={self.id!r})"

@@ -25,11 +25,11 @@ sqlite3 smart-meter-messstellenbetreiber/res/database.db "INSERT INTO kundenport
 rm -rf /tmp/key-*
 openssl genpkey -algorithm ed25519 -out /tmp/key-private.pem
 openssl pkey -in /tmp/key-private.pem -pubout -out /tmp/key-public.pem
-public_key=$(sed ':a;N;$!ba;s/\n/\\n/g' /tmp/key-public.pem)
+messstellenbetreiber_public_key=$(sed ':a;N;$!ba;s/\n/\\n/g' /tmp/key-public.pem)
 private_key=$(sed ':a;N;$!ba;s/\n/\\n/g' /tmp/key-private.pem)
 rm -rf /tmp/key-*
 cat > ./smart-meter-messstellenbetreiber/res/.env <<EOT
-PUBLIC_KEY=$public_key
+PUBLIC_KEY=$messstellenbetreiber_public_key
 PRIVATE_KEY=$private_key
 EOT
 sqlite3 smart-meter-messstellenbetreiber/res/database.db "INSERT INTO persons VALUES (NULL, 'Gigantikus', 'Maximus', 1, '112', 'max@giga.de')"
@@ -46,6 +46,7 @@ create_stromzaehler() {
   rm -rf /tmp/key-*
   cat > ./smart-meter-stromzaehler/generated/.env-$stromzaehler_id <<EOT
 MESSSTELLENBETREIBER_URL=http://host.docker.internal:9001
+MESSSTELLENBETREIBER_PUBLIC_KEY=$messstellenbetreiber_public_key
 STROMZAEHLER_ID=$stromzaehler_id
 PUBLIC_KEY=$public_key
 PRIVATE_KEY=$private_key
