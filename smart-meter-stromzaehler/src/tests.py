@@ -123,13 +123,14 @@ class AppTest(unittest.TestCase):
         # Check response code
         self.assertEqual(response.status_code, 200)
 
+        print(f"sent header: {jwt_token}")
         # Check response hash
         print(response.headers)
         token = response.headers["Authorization"].split(" ")[-1]
+        print('cmp with')
+        print(bytes(response.headers["Authorization"], 'utf-8'))
         try:
             key = serialization.load_pem_public_key((os.getenv('MESSSTELLENBETREIBER_PUBLIC_KEY').replace('\\n', '\n').encode()))
-            print(token)
-            print(key)
             jwt_body = jwt.decode(token, key, algorithms=['EdDSA'])
         except Exception as e:
             print(e)
@@ -151,6 +152,19 @@ class AppTest(unittest.TestCase):
         self.assertIsNotNone(response)
         self.assertEqual(response.status_code, 200)
 
+
+    def test_a(self):
+        print('------------------')
+
+        a = b'eyJ0eXAiOiJKV1QiLCJhbGciOiJFZERTQSIsImNydiI6IkVkMjU1MTkifQ.eyJtb2RlIjoiU0hBMjU2Iiwic2lnbmF0dXJlIjoiZjFlYTA3YTFlNTFhMzg5YzhkZTA3MTIwYWU1YzJlNDMyZTlkZDhmNGZiZDZmOTI0ODlmMTg1YjA1MjNhM2ZkNCJ9.K--kvxU0Wlvx3AKggPd6OfUu2UtiBmY2f0SPfZMaSIunCqMFLHNPr3KrrtuMna88nD78Z3wnexD0ejzc0U2KCg'
+        try:
+            key = serialization.load_pem_public_key(
+                (os.getenv('MESSSTELLENBETREIBER_PUBLIC_KEY').replace('\\n', '\n').encode()))
+            jwt_body = jwt.decode(a.decode('utf-8'), key, algorithms=['EdDSA'])
+        except Exception as e:
+            print(e)
+        print(jwt_body)
+        print('------------------')
 
 if __name__ == '__main__':
     unittest.main()

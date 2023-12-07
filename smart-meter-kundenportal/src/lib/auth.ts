@@ -1,11 +1,11 @@
 import jwt from 'jsonwebtoken';
 import { redirect, type ServerLoad } from '@sveltejs/kit';
-import type { Prisma, User } from '@prisma/client';
+import type { User } from '@prisma/client';
 
 export type AuthGuardOutput = {
 	status: number;
 	data?: {
-		user: Prisma.UserCreateInput;
+		user: User;
 	};
 };
 

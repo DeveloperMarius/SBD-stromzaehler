@@ -142,7 +142,6 @@ def signing_response(body: dict):
     }
 
     jwt_token = 'Bearer ' + jwt.encode(jwt_data, get_private_rsa_key(), "EdDSA", headers={'crv': 'Ed25519'})
-    print(f"gen jwt: {jwt_token}")
     response.headers['Authorization'] = jwt_token
 
     return response

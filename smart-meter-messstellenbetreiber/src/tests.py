@@ -23,7 +23,7 @@ class AppTest(unittest.TestCase):
     def setUpClass(cls):
         load_dotenv(f"{os.path.dirname(os.path.realpath(__file__))}/../res/.env")
         print("Starting Flask Server...")
-        cls.flask_server = subprocess.Popen(["python3", f"{os.path.dirname(os.path.realpath(__file__))}/app.py"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        cls.flask_server = subprocess.Popen(["python3", f"{os.path.dirname(os.path.realpath(__file__))}/app.py"])#, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         sleep(5)
         print("Started")
 
