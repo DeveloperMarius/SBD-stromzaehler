@@ -220,7 +220,7 @@ class AppTest(unittest.TestCase):
             "start_date": local_tz.localize(datetime.fromtimestamp(timestamp_1 / 1000.0)).date().strftime('%Y-%m-%d'),
             "end_date": local_tz.localize(datetime.fromtimestamp(timestamp_3 / 1000.0)).date().strftime('%Y-%m-%d')
         })
-        history1_response = requests.get('http://localhost:5000/api/stromzaehler/history',
+        history1_response = requests.post('http://localhost:5000/api/stromzaehler/history',
                                          headers={"Authorization": AppTest.generate_kundenportal_jwt(history1_body),
                                                   'Content-Type': 'application/json'},
                                          data=history1_body)
@@ -233,7 +233,7 @@ class AppTest(unittest.TestCase):
             "start_date": local_tz.localize(datetime.fromtimestamp((timestamp_1 - 2) / 1000.0)).date().strftime('%Y-%m-%d'),
             "end_date": local_tz.localize(datetime.fromtimestamp((timestamp_1 - 2) / 1000.0)).date().strftime('%Y-%m-%d')
         })
-        history2_response = requests.get('http://localhost:5000/api/stromzaehler/history',
+        history2_response = requests.post('http://localhost:5000/api/stromzaehler/history',
                                          headers={"Authorization": AppTest.generate_kundenportal_jwt(history2_body),
                                                   'Content-Type': 'application/json'},
                                          data=history2_body)
@@ -246,7 +246,7 @@ class AppTest(unittest.TestCase):
             "start_date": local_tz.localize(datetime.fromtimestamp(timestamp_2 / 1000.0)).date().strftime('%Y-%m-%d'),
             "end_date": local_tz.localize(datetime.fromtimestamp((timestamp_2 + 1) / 1000.0)).date().strftime('%Y-%m-%d')
         })
-        history3_response = requests.get('http://localhost:5000/api/stromzaehler/history',
+        history3_response = requests.post('http://localhost:5000/api/stromzaehler/history',
                                          headers={"Authorization": AppTest.generate_kundenportal_jwt(history3_body),
                                                   'Content-Type': 'application/json'},
                                          data=history3_body)

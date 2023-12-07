@@ -1,3 +1,5 @@
+import { writable } from 'svelte/store';
+
 export type Reading = {
 	stromzaehler_id: string;
 	timestamp: number;
@@ -9,3 +11,5 @@ export type PowermeterReading = {
 	powermeter_id: string;
 	readings: Reading[];
 };
+
+export const powermeterReadings = writable<PowermeterReading[]>([]);

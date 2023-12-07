@@ -42,7 +42,15 @@
 		<Card padding="xl" class="max-w-full">
 			<div class="flex justify-between items-center mb-4">
 				<h5 class="text-xl font-bold leading-none text-gray-900 dark:text-white">
-					{contract.name} ({contract.powermeter[0].id})
+
+					{contract.name} 
+					{#if contract.powermeter.length > 1}
+					(SID - 
+					{#each contract.powermeter as powermeter}
+							{powermeter.id}
+						{/each}
+						)
+					{/if}
 				</h5>
 				<p>
 					({dayjs(contract.startDate).format('DD.MM.YYYY')} - {dayjs(contract.endDate).format(

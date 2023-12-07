@@ -78,12 +78,6 @@ export const actions: Actions = {
 			});
 		}
 
-		if (!(await register_powermeter(powermeter_id, user)))
-			return fail(500, {
-				error:
-					'Server Fehler: Smart-Meter konnte nicht eingerichtet werden. Daten sind noch nicht verfügbar.'
-			});
-
 		const createdContract = await prisma.contract.create({
 			data: {
 				name: 'Smartvertrag',
@@ -97,6 +91,18 @@ export const actions: Actions = {
 				}
 			}
 		});
+
+		if (!(await register_powermeter(powermeter_id, createdContract.id, user))) {
+			await prisma.contract.delete({
+				where: {
+					id: createdContract.id
+				}
+			});
+			return fail(500, {
+				error:
+					'Server Fehler: Smart-Meter konnte nicht eingerichtet werden. Daten sind noch nicht verfügbar.'
+			});
+		}
 
 		const contract = await prisma.contract.findFirst({
 			where: {
@@ -114,6 +120,7 @@ export const actions: Actions = {
 				endDate: true,
 				powermeter: {
 					select: {
+						id: true,
 						powermeterStart: true
 					}
 				}

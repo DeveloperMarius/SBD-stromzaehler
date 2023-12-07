@@ -55,7 +55,7 @@ def stromzaehler_update(stromzaehler):
     return signing_response({'success': True})
 
 
-@api_routes_blueprint.route('/stromzaehler/history', methods=['GET'])
+@api_routes_blueprint.route('/stromzaehler/history', methods=['POST'])
 @token_required('kundenportal')
 def get_stromzaehler_history(stromzaehler):
     data = request.json

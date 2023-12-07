@@ -15,7 +15,26 @@ export const load: ServerLoad = async (event) => {
 			id: user.id
 		},
 		select: {
-			contract: {}
+			contract: {
+				select: {
+					id: true,
+					name: true,
+					strasse: true,
+					hausnr: true,
+					plz: true,
+					ort: true,
+					iban: true,
+					blz: true,
+					startDate: true,
+					endDate: true,
+					powermeter: {
+						select: {
+							id: true,
+							powermeterStart: true
+						}
+					}
+				}
+			}
 		}
 	});
 
