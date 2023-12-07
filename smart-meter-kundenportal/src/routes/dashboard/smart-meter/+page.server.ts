@@ -1,4 +1,5 @@
 import { auth_guard, type AuthGuardOutput } from '$lib/auth';
+import { register_powermeter } from '$lib/powermeter';
 import prisma from '$lib/prisma';
 import { fail, redirect, type ServerLoad } from '@sveltejs/kit';
 import jwt from 'jsonwebtoken';
@@ -27,7 +28,8 @@ export const load: ServerLoad = async (event) => {
 			powermeter: {
 				select: {
 					id: true,
-					powermeterStart: true
+					powermeterStart: true,
+					registered: true
 				}
 			}
 		}
@@ -43,9 +45,15 @@ export const load: ServerLoad = async (event) => {
 		expiresIn: '12h'
 	});
 
+	const powermeterReadings = [];
+
 	contracts.forEach((contract) => {
-		contract.powermeter.forEach((powermeter) => {
-			fetch('http://localhost:9001/api/stromzaehler/history', {
+		contract.powermeter.forEach(async (powermeter) => {
+			if (!powermeter.registered) {
+				register_powermeter(powermeter.id, user);
+			}
+
+			const data = await fetch('http://localhost:9001/api/stromzaehler/history', {
 				method: 'POST',
 				headers: {
 					Authorization: 'Bearer ' + token,
@@ -55,6 +63,9 @@ export const load: ServerLoad = async (event) => {
 					powermeterId: powermeter.id
 				})
 			});
+
+			const { readings } = await data.json();
+			
 		});
 	});
 
