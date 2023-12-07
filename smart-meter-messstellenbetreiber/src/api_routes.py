@@ -17,7 +17,6 @@ def healthcheck():
     }), 200
 
 
-# todo check if stromzaehler stand is valid. (value größer als letzter value)
 @api_routes_blueprint.route('/stromzaehler/update', methods=['POST'])
 @token_required('stromzaehler')
 def stromzaehler_update(stromzaehler):
@@ -53,9 +52,7 @@ def stromzaehler_update(stromzaehler):
         session.add_all(logs)
 
         session.commit()
-    return jsonify({
-        'success': True
-    }), 200
+    return signing_response({'success': True})
 
 
 @api_routes_blueprint.route('/stromzaehler/history', methods=['GET'])
