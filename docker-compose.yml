@@ -10,8 +10,6 @@ services:
       - internet
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    environment:
-      - FLASK_DEBUG=1
   stromzaehler1:
     build: ./smart-meter-stromzaehler
     volumes:

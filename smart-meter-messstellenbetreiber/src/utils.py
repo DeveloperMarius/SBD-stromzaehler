@@ -69,8 +69,8 @@ def is_jwt_in_request(request):
 def is_body_signature_valid(request, jwt_body) -> bool:
     if jwt_body['mode'] is None or jwt_body['mode'] != 'SHA256' or jwt_body['signature'] is None:
         return False
-    body = request.get_json()
-    actual_hash = hashlib.sha256(json.dumps(body).encode('utf-8')).hexdigest()
+    body = request.get_data()
+    actual_hash = hashlib.sha256(body).hexdigest()
     return actual_hash == jwt_body['signature']
 
 

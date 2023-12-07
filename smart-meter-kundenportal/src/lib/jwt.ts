@@ -26,9 +26,5 @@ export async function sign_body(body: string) {
 			},
 			typ: 'JWT'
 		})
-		.setIssuedAt()
-		.setIssuer('smart-meter-kundenportal')
-		.setAudience('smart-meter')
-		.setExpirationTime('12h')
 		.sign(secret);
 }

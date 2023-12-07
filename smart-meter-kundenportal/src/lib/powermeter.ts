@@ -9,7 +9,7 @@ export async function register_powermeter(powermeter_id: string, user: User): Pr
 	}
 
 	const body = JSON.stringify({
-		id: 1,
+		id: powermeter_id,
 		person: {
 			firstname: user.vorname,
 			lastname: user.nachname,
@@ -32,7 +32,7 @@ export async function register_powermeter(powermeter_id: string, user: User): Pr
 	const response = await fetch('http://localhost:9001/api/stromzaehler/register', {
 		method: 'POST',
 		headers: {
-			Authorization: 'Bearer ' + sign_body(body),
+			Authorization: 'Bearer ' + (await sign_body(body)),
 			'Content-Type': 'application/json'
 		},
 		body
@@ -45,8 +45,7 @@ export async function register_powermeter(powermeter_id: string, user: User): Pr
 	}
 
 	const body2 = JSON.stringify({
-		id: 1,
-		powermeterId: powermeter_id,
+		'stromzaehler-id': powermeter_id,
 		start_date: '2021-01-01',
 		end_date: '2024-12-31'
 	});
@@ -54,7 +53,7 @@ export async function register_powermeter(powermeter_id: string, user: User): Pr
 	const readings_res = await fetch('http://localhost:9001/api/stromzaehler/history', {
 		method: 'POST',
 		headers: {
-			Authorization: 'Bearer ' + sign_body(body2),
+			Authorization: 'Bearer ' + (await sign_body(body2)),
 			'Content-Type': 'application/json'
 		},
 		body: body2
