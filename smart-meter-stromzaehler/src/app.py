@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 import json
 import hashlib
 from cryptography.hazmat.primitives import serialization
+import sys
+import traceback
 
 
 class Stromzaehler:
@@ -62,7 +64,7 @@ class Stromzaehler:
 
         jwt_body = None
         try:
-            key = serialization.load_pem_public_key((os.getenv('MESSSTELLENBETREIBER_PUBLIC_KEY').encode()))
+            key = serialization.load_pem_public_key((os.getenv('MESSSTELLENBETREIBER_PUBLIC_KEY').replace('\\n', '\n').encode()))
             jwt_body = jwt.decode(token, key, algorithms=['EdDSA'])
         except Exception as e:
             Variables.get_logger().log('JWT is invalid.')
@@ -71,7 +73,7 @@ class Stromzaehler:
         if jwt_body['mode'] is None or jwt_body['mode'] != 'SHA256' or jwt_body['signature'] is None:
             return False
 
-        actual_hash = hashlib.sha256(response.raw).hexdigest()
+        actual_hash = hashlib.sha256(json.dumps(response.json()).encode('utf-8')).hexdigest()
         if actual_hash != jwt_body['signature']:
             Variables.get_logger().log('Signature is invalid.')
             return
@@ -87,10 +89,12 @@ if __name__ == '__main__':
         Stromzaehler.simulate_energyusage()
         Variables.get_logger().log('Successfully simulated energyusage!')
     except Exception as e:
-        Variables.get_logger().log(f'Simulating energyusage failed! Fehler: {e}')
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        Variables.get_logger().log(f'Simulating energyusage failed! Fehler: {exc_type}: {str(e)} - {traceback.format_exc()}')
 
     try:
         Stromzaehler.send_data()
         Variables.get_logger().log('Successfully send data to Messstellenbetreiber.')
     except Exception as e:
-        Variables.get_logger().log(f'Sending data to Messstellenbetreiber failed! Fehler: {e}')
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        Variables.get_logger().log(f'Sending data to Messstellenbetreiber failed! Fehler: {exc_type}: {str(e)} - {traceback.format_exc()}')
