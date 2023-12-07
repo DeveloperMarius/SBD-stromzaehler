@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+
 # Cleanup
 rm -rf ./smart-meter-messstellenbetreiber/res/database.db
 rm -rf ./smart-meter-stromzaehler/generated
