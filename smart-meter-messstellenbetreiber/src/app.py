@@ -25,7 +25,7 @@ def forbidden(e):
 @app.errorhandler(Exception)
 def handle_exception(e):
     exc_type, exc_obj, exc_tb = sys.exc_info()
-    log_id = Variables.get_logger().log(request, f"{exc_type}: {str(e)} - {traceback.format_exc()}")
+    log_id = Variables.get_logger().log(request, f"{exc_type}: {str(e)[:2999] if len(str(e)) > 2999 else str(e)} - {traceback.format_exc()}")
     return jsonify({
         "message": "Error",
         "error": 'Error',
