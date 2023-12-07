@@ -13,7 +13,7 @@
 	<meta name="robots" content="noindex" />
 </svelte:head>
 
-<div class="flex justify-between items-center w-full bg-white px-6 py-2 rounded-md mb-3">
+<div class="flex justify-between items-center w-full bg-white px-6 py-2 rounded-md mb-3 shadow-md">
 	<h1 class="text-2xl">Übersicht</h1>
 </div>
 

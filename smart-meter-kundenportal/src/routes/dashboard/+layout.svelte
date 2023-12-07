@@ -19,7 +19,7 @@
 </svelte:head>
 
 <div class="flex min-h-screen">
-	<Sidebar class="h-screen" bind:activeUrl>
+	<Sidebar class="h-screen shadow-md" bind:activeUrl>
 		<SidebarWrapper class="min-h-screen relative">
 			<SidebarGroup class="mb-4">
 				<div class="flex items-center">
@@ -79,7 +79,7 @@
 
 <style lang="scss">
 	:global(body) {
-		@apply bg-slate-300 overflow-hidden;
+		@apply bg-slate-50 overflow-hidden;
 	}
 
 	main {

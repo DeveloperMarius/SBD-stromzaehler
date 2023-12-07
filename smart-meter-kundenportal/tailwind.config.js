@@ -19,28 +19,28 @@ export default {
 			colors: {
 				// flowbite-svelte
 				primary: {
-					50: '#DCF1C8',
-					100: '#FFF1EE',
-					200: '#EEE881', //gelb
-					300: '#98D789', // noch hellgrün
-					400: '#ACEF92', //hellgrün
-					500: '#018590', //grünblau
-					600: '#0A84B0', // wenig heller blau
-					700: '#0B6988', //navi 
-					800: '#59B78C', // grün
-					900: '#1E6952' //navi
+					50: '#2fffa2',
+					100: '#16ff96',
+					200: '#00fb8a', //gelb
+					300: '#00e17c', // noch hellgrün
+					400: '#00c76d', //hellgrün
+					500: '#00ad5f', //grünblau
+					600: '#009351', // wenig heller blau
+					700: '#007943', //navi
+					800: '#005f34', // grün
+					900: '#004526' //navi
 				},
 				lighty: {
 					50: '#DCF1C8',
 					100: '#62C8E4', //skyblue
-					200: '#DCF1C8', 
-					300: '#DCF1C8', 
-					400: '#DCF1C8', 
-					500: '#DCF1C8', 
-					600: '#DCF1C8', 
-					700: '#DCF1C8', 
-					800: '#DCF1C8', 
-					900: '#DCF1C8' 
+					200: '#DCF1C8',
+					300: '#DCF1C8',
+					400: '#DCF1C8',
+					500: '#DCF1C8',
+					600: '#DCF1C8',
+					700: '#DCF1C8',
+					800: '#DCF1C8',
+					900: '#DCF1C8'
 				}
 			},
 			backgroundImage: {

@@ -1,8 +1,9 @@
-import { auth_guard, type AuthGuardOutput } from '$lib/auth';
+import { auth_guard, type AuthGuardOutput, get_user_from_token } from '$lib/auth';
 import prisma from '$lib/prisma';
 import { redirect, type Actions, type ServerLoad, fail } from '@sveltejs/kit';
 import z from 'zod';
 import dayjs from 'dayjs';
+import { register_powermeter } from '$lib/powermeter';
 
 export const load: ServerLoad = async (event) => {
 	const auth = auth_guard(event) as AuthGuardOutput;
@@ -48,7 +49,7 @@ export const load: ServerLoad = async (event) => {
 };
 
 export const actions: Actions = {
-	async create_contract({ request }) {
+	async create_contract({ request, cookies }) {
 		const formData = await request.formData();
 
 		const newContract = z
@@ -62,11 +63,17 @@ export const actions: Actions = {
 			})
 			.safeParse(Object.fromEntries(formData));
 
-		const user_id = formData.get('user_id')?.toString();
+		const user = get_user_from_token(cookies.get('token'));
 
-		if (!user_id || !newContract.success) {
+		if (!user || !user.id || !newContract.success) {
 			return fail(400, {
 				error: 'Fehler bei der Erstellung eines Vertrages. Überprüfe deine Eingaben.'
+			});
+		}
+
+		if (!process.env.SECRET_PRIVATE_KEY) {
+			return fail(500, {
+				error: 'Server Fehler: Bitte versuchen Sie es später erneut.'
 			});
 		}
 
@@ -78,7 +85,7 @@ export const actions: Actions = {
 				endDate: dayjs().add(1, 'year').toISOString(),
 				user: {
 					connect: {
-						id: user_id
+						id: user.id
 					}
 				}
 			}
@@ -95,16 +102,11 @@ export const actions: Actions = {
 			}
 		});
 
-		// TODO: Get Stromzähler stand from API and save it to the powermeter
-
-		await prisma.powermeter.update({
-			where: {
-				id: powermeter.id
-			},
-			data: {
-				powermeterStart: 1000
-			}
-		});
+		if (!(await register_powermeter(powermeter.id, user)))
+			return fail(500, {
+				error:
+					'Server Fehler: Smart-Meter konnte nicht eingerichtet werden. Daten sind noch nicht verfügbar.'
+			});
 
 		const contract = await prisma.contract.findFirst({
 			where: {

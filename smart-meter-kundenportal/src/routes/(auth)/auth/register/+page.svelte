@@ -11,7 +11,7 @@
 	<meta name="robots" content="noindex" />
 </svelte:head>
 
-<div class="flex justify-center items-center h-screen">
+<div class="flex justify-center items-center min-h-screen p-10">
 	<Section name="register" sectionClass="relative md:w-1/2 sm:3/4 w-11/12">
 		<Register href="/">
 			<div class="p-6 space-y-4 md:space-y-6 sm:p-8 w-">

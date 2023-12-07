@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { redirect, type ServerLoad } from '@sveltejs/kit';
-import type { Prisma } from '@prisma/client';
+import type { Prisma, User } from '@prisma/client';
 
 export type AuthGuardOutput = {
 	status: number;
@@ -12,15 +12,10 @@ export type AuthGuardOutput = {
 export const auth_guard: ServerLoad = ({ cookies }) => {
 	const token = cookies.get('token');
 
-	if (!token || !process.env.JWT_SECRET) {
-		throw redirect(302, `/auth/login`);
-	}
+	const user = get_user_from_token(token);
 
-	let user;
-	try {
-		user = jwt.verify(token, process.env.JWT_SECRET);
-	} catch (error) {
-		throw redirect(302, `/auth/login`);
+	if (!user) {
+		return redirect(302, `/auth/login`);
 	}
 
 	return {
@@ -29,4 +24,19 @@ export const auth_guard: ServerLoad = ({ cookies }) => {
 			user
 		}
 	};
+};
+
+export const get_user_from_token = (token: string | undefined): User | null => {
+	if (!token || !process.env.JWT_SECRET) {
+		return null;
+	}
+
+	let user;
+	try {
+		user = jwt.verify(token, process.env.JWT_SECRET);
+	} catch (error) {
+		return null;
+	}
+
+	return user as User;
 };

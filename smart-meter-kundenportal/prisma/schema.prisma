@@ -51,6 +51,7 @@ model Powermeter {
   id         String    @id @default(uuid())
   Contract   Contract? @relation(fields: [contractId], references: [id], onDelete: Cascade)
   contractId String?
+  registered Boolean   @default(false)
 
   powermeterStart Int
 }
