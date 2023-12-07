@@ -61,7 +61,7 @@ def get_stromzaehler_history(stromzaehler):
     data = request.json
     try:
         start_date = round(datetime.strptime(data['start_date'], '%Y-%m-%d').timestamp() * 1000)
-        end_date = round(datetime.strptime(data['end_date'], '%Y-%m-%d').timestamp() * 1000) + 86400000  # + one_day
+        end_date = round(datetime.strptime(data['end_date'], '%Y-%m-%d').timestamp() * 1000) + 86399999  # + one_day
         stromzaehler_id = data['stromzaehler_id']
     except Exception as e:
         print(f"Unprocessable Entity: {e}")
@@ -72,7 +72,7 @@ def get_stromzaehler_history(stromzaehler):
             (StromzaehlerReading.stromzaehler == stromzaehler_id) &
             (start_date <= StromzaehlerReading.timestamp) &
             (StromzaehlerReading.timestamp <= end_date)
-        ).order_by(StromzaehlerReading.timestamp.desc())
+        ).order_by(StromzaehlerReading.timestamp.asc())
         response = session.scalars(statement)
         raw_readings = response.fetchall()
 
