@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 services:
   messstellenbetreiber1:
     build: ./smart-meter-messstellenbetreiber
@@ -35,6 +35,7 @@ services:
       - messstellenbetreiber1
     extra_hosts:
       - "host.docker.internal:host-gateway"
+
 networks:
   internet:
 # https://stackoverflow.com/questions/56203272/docker-compose-scaling-with-unique-environment-variable

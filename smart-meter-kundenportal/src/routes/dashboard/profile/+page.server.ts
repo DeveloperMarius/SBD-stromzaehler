@@ -4,6 +4,7 @@ import prisma from '$lib/prisma';
 import { redirect, type Actions, type ServerLoad, fail } from '@sveltejs/kit';
 import { z } from 'zod';
 import type { Prisma } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 export const load: ServerLoad = async (event) => {
 	const auth = auth_guard(event) as AuthGuardOutput;
@@ -114,10 +115,7 @@ export const actions: Actions = {
 				error: 'Deine Accountdaten wurden nicht aktualisiert.'
 			});
 
-		const newPassword = await Bun.password.hash(password.data.password, {
-			algorithm: 'bcrypt',
-			cost: 10
-		});
+		const newPassword = await bcrypt.hash(password.data.password, 10);
 
 		let user;
 		const token = cookies.get('token');

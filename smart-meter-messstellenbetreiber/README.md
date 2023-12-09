@@ -70,8 +70,8 @@ Endpoint to register a new stromzaehler. Used by Kundenportal.
 {
   "id": 1,
   "person": {
-    "first_name": "Max",
-    "last_name": "Mustermann",
+    "firstname": "Max",
+    "lastname": "Mustermann",
     "gender": 1,
     "phone": "+49...",
     "email": "max@mustermann.de"

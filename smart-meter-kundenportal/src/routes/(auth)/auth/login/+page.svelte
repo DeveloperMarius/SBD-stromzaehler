@@ -11,10 +11,10 @@
 	<meta name="robots" content="noindex" />
 </svelte:head>
 
-<div class="flex justify-center items-center min-h-screen p-10">
+<div class="flex justify-center items-center min-h-screen p-10 bg-slate-50">
 	<Section name="register" sectionClass="relative md:w-1/2 sm:3/4 w-11/12">
 		<Register href="/">
-			<div class="p-6 space-y-4 md:space-y-6 sm:p-8 w-">
+			<div class="p-6 space-y-4 md:space-y-6 sm:p-8">
 				<form class="flex flex-col space-y-6" method="POST" action="?/login" use:enhance>
 					<h3 class="text-xl font-medium text-gray-900 dark:text-white p-0">Anmelden</h3>
 					{#if $page.status != 200}<p class="text-red-700">{$page.form.error}</p>{/if}

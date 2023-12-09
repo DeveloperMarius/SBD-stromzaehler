@@ -4,6 +4,7 @@ import { fail, type Actions, redirect } from '@sveltejs/kit';
 import type { ServerLoad } from '@sveltejs/kit';
 import jwt from 'jsonwebtoken';
 import z from 'zod';
+import bcrypt from 'bcrypt';
 
 export const load: ServerLoad = async ({ cookies }) => {
 	const token = cookies.get('token');
@@ -63,10 +64,7 @@ export const actions: Actions = {
 
 		user = form.data;
 
-		user.password = await Bun.password.hash(user.password, {
-			algorithm: 'bcrypt',
-			cost: 10
-		});
+		user.password = await bcrypt.hash(user.password, 10);
 
 		user = await prisma.user.create({
 			data: user

@@ -7,5 +7,25 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=postgres
-    ports:
+    expose:
       - 5432:5432
+    networks:
+      - kundenportal
+  kundenportal:
+    build: .
+    expose:
+      - 3000
+    depends_on:
+      - db
+    networks:
+      - kundenportal
+    labels:
+      - traefik.enable=true
+      - traefik.entrypoints=websecure
+      - traefik.http.routers.homepage.rule=Host(`smartstrom24jetzt.hauschildt.dev`)
+      - traefik.http.routers.homepage.tls=true
+      - traefik.http.routers.homepage.tls.certresolver=letssl
+
+networks:
+  kundenportal:
+    name: kundenportal
