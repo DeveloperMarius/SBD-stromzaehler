@@ -34,6 +34,9 @@ class AppTest(unittest.TestCase):
         cls.flask_server.wait()
         print("Flask Server closed.")
 
+    def setUp(self):
+        Variables.get_database().clear_database()
+
     @staticmethod
     def generate_stromzaehler_jwt(body):
         jwt_data = {
@@ -85,9 +88,8 @@ class AppTest(unittest.TestCase):
         }
         response = None
         try:
-            response = requests.post('http://localhost:5000/api/stromzaehler/register', data=json.dumps(body), headers={
-                'Authorization': self.generate_kundenportal_jwt(json.dumps(body2)),
-                'Content-Type': 'application/json'
+            response = requests.post('http://localhost:5000/api/stromzaehler/register', json=body, headers={
+                'Authorization': self.generate_kundenportal_jwt(json.dumps(body2))
             })
         except Exception as e:
             pass
@@ -211,48 +213,49 @@ class AppTest(unittest.TestCase):
                                         headers={"Authorization": AppTest.generate_stromzaehler_jwt(update_body),
                                                  'Content-Type': 'application/json'},
                                         data=update_body)
-        self.assertEquals(update_response.status_code, 200)
-        self.assertEquals(update_response.json(), {"success": True})
+        self.assertEqual(update_response.status_code, 200)
+        self.assertEqual(update_response.json(), {"success": True})
 
         # Testing stromzaehler history
         history1_body = json.dumps({
             "stromzaehler_id": stromzaehler_id,
             "start_date": local_tz.localize(datetime.fromtimestamp(timestamp_1 / 1000.0)).date().strftime('%Y-%m-%d'),
-            "end_date": datetime.fromtimestamp(timestamp_2 / 1000.0).date().strftime('%Y-%m-%d')
+            "end_date": local_tz.localize(datetime.fromtimestamp(timestamp_2 / 1000.0)).date().strftime('%Y-%m-%d')
         })
         history1_response = requests.get('http://localhost:5000/api/stromzaehler/history',
                                          headers={"Authorization": AppTest.generate_kundenportal_jwt(history1_body),
                                                   'Content-Type': 'application/json'},
                                          data=history1_body)
 
-        self.assertEquals(history1_response.status_code, 200)
-        self.assertEquals(history1_response.json(), readings)
+        self.assertEqual(history1_response.status_code, 200)
+        readings2 = sorted(history1_response.json()['readings'], key=lambda x: x['id'])
+        self.assertEqual(readings2, readings)
 
         history2_body = json.dumps({
             "stromzaehler_id": stromzaehler_id,
-            "start_date": datetime.fromtimestamp((timestamp_1 - 2) / 1000.0).date().strftime('%Y-%m-%d'),
-            "end_date": datetime.fromtimestamp((timestamp_1 - 2) / 1000.0).date().strftime('%Y-%m-%d')
+            "start_date": local_tz.localize(datetime.fromtimestamp((timestamp_1 / 1000.0) - 60*60*24*2)).date().strftime('%Y-%m-%d'),
+            "end_date": local_tz.localize(datetime.fromtimestamp((timestamp_1 / 1000.0) - (60*60*24*2))).date().strftime('%Y-%m-%d')
         })
         history2_response = requests.get('http://localhost:5000/api/stromzaehler/history',
                                          headers={"Authorization": AppTest.generate_kundenportal_jwt(history2_body),
                                                   'Content-Type': 'application/json'},
                                          data=history2_body)
 
-        self.assertEquals(history2_response.status_code, 200)
-        self.assertEquals(history2_response.json(), {"readings": []})
+        self.assertEqual(history2_response.status_code, 200)
+        self.assertEqual(history2_response.json(), {"readings": []})
 
         history3_body = json.dumps({
             "stromzaehler_id": stromzaehler_id,
-            "start_date": datetime.fromtimestamp(timestamp_2 / 1000.0).date().strftime('%Y-%m-%d'),
-            "end_date": datetime.fromtimestamp((timestamp_2 + 1) / 1000.0).date().strftime('%Y-%m-%d')
+            "start_date": local_tz.localize(datetime.fromtimestamp((timestamp_2 / 1000.0) + (60*60*24*2))).date().strftime('%Y-%m-%d'),
+            "end_date": local_tz.localize(datetime.fromtimestamp((timestamp_2 / 1000.0) + (60*60*24*2))).date().strftime('%Y-%m-%d')
         })
         history3_response = requests.get('http://localhost:5000/api/stromzaehler/history',
                                          headers={"Authorization": AppTest.generate_kundenportal_jwt(history3_body),
                                                   'Content-Type': 'application/json'},
                                          data=history3_body)
 
-        self.assertEquals(history3_response.status_code, 200)
-        self.assertEquals(history3_response.json(), {"readings": [readings[1]]})
+        self.assertEqual(history3_response.status_code, 200)
+        self.assertEqual(history3_response.json(), {"readings": []})
 
 
 if __name__ == '__main__':

@@ -2,12 +2,13 @@ import logging
 import jwt
 import os
 import time
-from models import Stromzaehler, Log, Kundenportal
+from models import Stromzaehler, Log, Kundenportal, StromzaehlerReading, StromzaehlerLog
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 from sqlalchemy import select
 from cryptography.hazmat.primitives import serialization
 from flask import jsonify
+from sqlalchemy import delete
 import json
 import hashlib
 import sys
@@ -43,6 +44,16 @@ class Database:
     def get_engin(self):
         return self.engine
 
+    def clear_database(self):
+        with Session(self.get_engin()) as session:
+            statement = delete(Log)
+            session.execute(statement)
+            statement = delete(StromzaehlerReading)
+            session.execute(statement)
+            statement = delete(StromzaehlerLog)
+            session.execute(statement)
+            session.commit()
+
 
 class Logger:
     @staticmethod
@@ -69,8 +80,8 @@ def is_jwt_in_request(request):
 def is_body_signature_valid(request, jwt_body) -> bool:
     if jwt_body['mode'] is None or jwt_body['mode'] != 'SHA256' or jwt_body['signature'] is None:
         return False
-    body = request.get_json()
-    actual_hash = hashlib.sha256(json.dumps(body).encode('utf-8')).hexdigest()
+    body = request.get_data()
+    actual_hash = hashlib.sha256(body).hexdigest()
     return actual_hash == jwt_body['signature']
 
 
