@@ -23,7 +23,8 @@ class AppTest(unittest.TestCase):
     def setUpClass(cls):
         load_dotenv(f"{os.path.dirname(os.path.realpath(__file__))}/../res/.env")
         print("Starting Flask Server...")
-        cls.flask_server = subprocess.Popen(["python3", f"{os.path.dirname(os.path.realpath(__file__))}/app.py"])#, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        cls.flask_server = subprocess.Popen(["python3",
+                                             f"{os.path.dirname(os.path.realpath(__file__))}/app.py"])  # , stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         sleep(5)
         print("Started")
 
@@ -42,7 +43,8 @@ class AppTest(unittest.TestCase):
             'mode': "SHA256",
             'signature': hashlib.sha256(body.encode('utf-8')).hexdigest()
         }
-        values = dotenv_values(f"{os.path.dirname(os.path.realpath(__file__))}/../../smart-meter-stromzaehler/generated/.env-1")
+        values = dotenv_values(
+            f"{os.path.dirname(os.path.realpath(__file__))}/../../smart-meter-stromzaehler/generated/.env-1")
         key = values['PRIVATE_KEY'].replace('\\n', '\n')
         private_key = serialization.load_pem_private_key(key.encode(), password=None)
 
@@ -66,6 +68,17 @@ class AppTest(unittest.TestCase):
         private_key = serialization.load_pem_private_key(key.encode(), password=None)
 
         return 'Bearer ' + jwt.encode(jwt_data, private_key, "EdDSA", headers={'crv': 'Ed25519'})
+
+    @staticmethod
+    def clear_stromzaehler_readings_and_alerts():
+        with Session(Variables.get_database().get_engin()) as session:
+            table = Alert.__table__
+            delete_statement = delete(table)
+            session.execute(delete_statement)
+            table = StromzaehlerReading.__table__
+            delete_statement = delete(table)
+            session.execute(delete_statement)
+            session.commit()
 
     def test_healthcheck(self):
         response = None
@@ -177,6 +190,7 @@ class AppTest(unittest.TestCase):
             self.assertEqual(response.address_obj.street, body['address']['street'])
 
     def test_stromzaehler_update_and_history(self):
+        self.clear_stromzaehler_readings_and_alerts()
         # Testing stromzaehler_update
         local_tz = pytz.timezone('Europe/Berlin')
 
@@ -221,22 +235,24 @@ class AppTest(unittest.TestCase):
             "end_date": local_tz.localize(datetime.fromtimestamp(timestamp_3 / 1000.0)).date().strftime('%Y-%m-%d')
         })
         history1_response = requests.post('http://localhost:5000/api/stromzaehler/history',
-                                         headers={"Authorization": AppTest.generate_kundenportal_jwt(history1_body),
-                                                  'Content-Type': 'application/json'},
-                                         data=history1_body)
+                                          headers={"Authorization": AppTest.generate_kundenportal_jwt(history1_body),
+                                                   'Content-Type': 'application/json'},
+                                          data=history1_body)
 
         self.assertEqual(history1_response.status_code, 200)
         self.assertEqual(history1_response.json()['readings'], readings)
 
         history2_body = json.dumps({
             "stromzaehler_id": stromzaehler_id,
-            "start_date": local_tz.localize(datetime.fromtimestamp((timestamp_1 - 2) / 1000.0)).date().strftime('%Y-%m-%d'),
-            "end_date": local_tz.localize(datetime.fromtimestamp((timestamp_1 - 2) / 1000.0)).date().strftime('%Y-%m-%d')
+            "start_date": local_tz.localize(datetime.fromtimestamp((timestamp_1 - 2) / 1000.0)).date().strftime(
+                '%Y-%m-%d'),
+            "end_date": local_tz.localize(datetime.fromtimestamp((timestamp_1 - 2) / 1000.0)).date().strftime(
+                '%Y-%m-%d')
         })
         history2_response = requests.post('http://localhost:5000/api/stromzaehler/history',
-                                         headers={"Authorization": AppTest.generate_kundenportal_jwt(history2_body),
-                                                  'Content-Type': 'application/json'},
-                                         data=history2_body)
+                                          headers={"Authorization": AppTest.generate_kundenportal_jwt(history2_body),
+                                                   'Content-Type': 'application/json'},
+                                          data=history2_body)
 
         self.assertEqual(history2_response.status_code, 200)
         self.assertEqual(history2_response.json(), {"readings": []})
@@ -244,26 +260,20 @@ class AppTest(unittest.TestCase):
         history3_body = json.dumps({
             "stromzaehler_id": stromzaehler_id,
             "start_date": local_tz.localize(datetime.fromtimestamp(timestamp_2 / 1000.0)).date().strftime('%Y-%m-%d'),
-            "end_date": local_tz.localize(datetime.fromtimestamp((timestamp_2 + 1) / 1000.0)).date().strftime('%Y-%m-%d')
+            "end_date": local_tz.localize(datetime.fromtimestamp((timestamp_2 + 1) / 1000.0)).date().strftime(
+                '%Y-%m-%d')
         })
         history3_response = requests.post('http://localhost:5000/api/stromzaehler/history',
-                                         headers={"Authorization": AppTest.generate_kundenportal_jwt(history3_body),
-                                                  'Content-Type': 'application/json'},
-                                         data=history3_body)
+                                          headers={"Authorization": AppTest.generate_kundenportal_jwt(history3_body),
+                                                   'Content-Type': 'application/json'},
+                                          data=history3_body)
 
         self.assertEqual(history3_response.status_code, 200)
         self.assertEqual(history3_response.json()['readings'], [readings[1]])
 
     def test_alert_on_to_little_readings(self):
         # Deleting database entries in StromzaehlerReadings and Alerts
-        with Session(Variables.get_database().get_engin()) as session:
-            table = Alert.__table__
-            delete_statement = delete(table)
-            session.execute(delete_statement)
-            table = StromzaehlerReading.__table__
-            delete_statement = delete(table)
-            session.execute(delete_statement)
-            session.commit()
+        self.clear_stromzaehler_readings_and_alerts()
 
         with Session(Variables.get_database().get_engin()) as session:
             # sending reading
@@ -341,14 +351,7 @@ class AppTest(unittest.TestCase):
 
     def test_alert_on_lower_value(self):
         # Deleting database entries in StromzaehlerReadings and Alerts
-        with Session(Variables.get_database().get_engin()) as session:
-            table = Alert.__table__
-            delete_statement = delete(table)
-            session.execute(delete_statement)
-            table = StromzaehlerReading.__table__
-            delete_statement = delete(table)
-            session.execute(delete_statement)
-            session.commit()
+        self.clear_stromzaehler_readings_and_alerts()
 
         with Session(Variables.get_database().get_engin()) as session:
             # sending reading
@@ -400,6 +403,51 @@ class AppTest(unittest.TestCase):
             self.assertEqual(len(alerts), 1)
             self.assertEqual(alerts[0].stromzaehler, 1)
             self.assertEqual(alerts[0].message, 'Stromzaehler provided a smaller value than before!')
+
+    def test_endpoint_alert(self):
+        self.clear_stromzaehler_readings_and_alerts()
+
+        timestamp = 1702380120000
+        readings = [
+            {
+                "id": 1,
+                "timestamp": timestamp,
+                "value": 10
+            },
+            {
+                "id": 2,
+                "timestamp": timestamp + (2 * Variables.get_cronjob_interval()),
+                "value": 11
+            }
+        ]
+        update_body = json.dumps({
+            "readings": readings,
+            "logs": []
+        })
+        update_response = requests.post('http://localhost:5000/api/stromzaehler/update',
+                                        headers={"Authorization": AppTest.generate_stromzaehler_jwt(update_body),
+                                                 'Content-Type': 'application/json'},
+                                        data=update_body)
+        self.assertEqual(update_response.status_code, 200)
+
+        alert_body = json.dumps({
+            "stromzaehler_id": 1
+        })
+
+        alert_response = requests.get('http://localhost:5000/api/stromzaehler/alerts',
+                                      headers={"Authorization": AppTest.generate_kundenportal_jwt(alert_body),
+                                               'Content-Type': 'application/json'},
+                                      data=alert_body)
+        self.assertEqual(alert_response.status_code, 200)
+        with Session(Variables.get_database().get_engin()) as session:
+            # Getting alert
+            statement = select(Alert).where(Alert.id == 1)
+            expected_alert = session.scalar(statement)
+        data = alert_response.json()
+        self.assertEqual(expected_alert.stromzaehler, data['alerts'][0]['stromzaehler_id'])
+        self.assertEqual(expected_alert.id, data['alerts'][0]['id'])
+        self.assertEqual(expected_alert.message, data['alerts'][0]['message'])
+        self.assertEqual(expected_alert.timestamp, data['alerts'][0]['timestamp'])
 
 
 if __name__ == '__main__':

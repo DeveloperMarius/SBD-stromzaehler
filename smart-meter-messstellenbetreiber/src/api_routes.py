@@ -213,3 +213,32 @@ def get_public_key():
     return jsonify({
         'public_key': get_public_rsa_key()
     })
+
+
+@api_routes_blueprint.route('/stromzaehler/alerts', methods=['GET'])
+@token_required('kundenportal')
+def get_stromzaehler_alerts(kundenportal):
+    data = request.json
+    if "stromzaehler_id" in data:
+        stromzaehler_id = data['stromzaehler_id']
+    else:
+        return '', 422
+
+    with Session(Variables.get_database().get_engin()) as session:
+        statement = select(Alert).where(Alert.stromzaehler == stromzaehler_id)
+        response = session.scalars(statement)
+        raw_alerts = response.fetchall()
+
+    alerts = []
+    for alert in raw_alerts:
+        alerts.append({
+            "id": alert.id,
+            "stromzaehler_id": alert.stromzaehler,
+            "message": alert.message,
+            "timestamp": alert.timestamp
+        })
+    body = {
+        "alerts": alerts
+    }
+    return signing_response(body)
+
