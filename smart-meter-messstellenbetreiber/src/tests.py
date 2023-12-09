@@ -449,6 +449,39 @@ class AppTest(unittest.TestCase):
         self.assertEqual(expected_alert.message, data['alerts'][0]['message'])
         self.assertEqual(expected_alert.timestamp, data['alerts'][0]['timestamp'])
 
+    def test_kundenportal_endpoint_with_stromzaehler_credentials(self):
+        body = json.dumps({
+            "stromzaehler_id": 1
+        })
+        response = requests.get('http://localhost:5000/api/stromzaehler/alerts',
+                                headers={"Authorization": AppTest.generate_stromzaehler_jwt(body),
+                                         'Content-Type': 'application/json'},
+                                data=body)
+        self.assertEqual(response.status_code, 401)
+
+    def test_stromzaehler_endpoint_with_kundenportal_credentials(self):
+        timestamp = 1702380120000
+        body = json.dumps({
+            "readings": [
+                {
+                    "id": 1,
+                    "timestamp": timestamp,
+                    "value": 10
+                },
+                {
+                    "id": 2,
+                    "timestamp": timestamp + (2 * Variables.get_cronjob_interval()),
+                    "value": 11
+                }
+            ],
+            "logs": []
+        })
+        response = requests.post('http://localhost:5000/api/stromzaehler/update',
+                                 headers={"Authorization": AppTest.generate_kundenportal_jwt(body),
+                                          'Content-Type': 'application/json'},
+                                 data=body)
+        self.assertEqual(response.status_code, 401)
+
 
 if __name__ == '__main__':
     unittest.main()
