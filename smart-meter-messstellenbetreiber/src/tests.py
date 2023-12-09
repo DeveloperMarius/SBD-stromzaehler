@@ -7,7 +7,7 @@ from time import sleep
 import hashlib
 from cryptography.hazmat.primitives import serialization
 import jwt
-from models import Stromzaehler
+from models import Stromzaehler, Log
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from utils import Variables, get_current_milliseconds
@@ -256,6 +256,40 @@ class AppTest(unittest.TestCase):
 
         self.assertEqual(history3_response.status_code, 200)
         self.assertEqual(history3_response.json(), {"readings": []})
+
+    def test_input_validation(self):
+        with Session(Variables.get_database().get_engin()) as session:
+            try:
+                entry = Log(
+                    timestamp=1701385200000,
+                    endpoint='/api',
+                    method='GETTTTTTTTTTTTTTTTTTTTTTTTT',
+                    source_type='stromzaehler',
+                    source_id=1,
+                    message=''
+                )
+                session.add(entry)
+                session.commit()
+                self.assertTrue(False)
+            except Exception as e:
+                self.assertTrue(True)
+                session.rollback()
+
+            try:
+                entry = Log(
+                    timestamp=1701385200000,
+                    endpoint='/api',
+                    method='GET',
+                    source_type='stromzaehler',
+                    source_id=1,
+                    message=''
+                )
+                session.add(entry)
+                session.commit()
+                self.assertTrue(True)
+            except Exception as e:
+                print(e)
+                self.assertTrue(False)
 
 
 if __name__ == '__main__':
