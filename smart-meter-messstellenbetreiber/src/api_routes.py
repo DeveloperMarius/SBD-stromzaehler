@@ -1,11 +1,10 @@
 from flask import jsonify, Blueprint, request
 from auth_middleware import token_required
-from utils import Variables, get_public_rsa_key, signing_response
+from utils import Variables, get_public_rsa_key, signing_response, get_current_milliseconds
 from datetime import datetime
-from models import StromzaehlerLog, StromzaehlerReading, Stromzaehler, Person, Address
+from models import StromzaehlerLog, StromzaehlerReading, Stromzaehler, Person, Address, Alert
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-import pytz
 
 api_routes_blueprint = Blueprint('API Routes', __name__)
 
@@ -23,12 +22,25 @@ def stromzaehler_update(stromzaehler):
     data = request.json
 
     with Session(Variables.get_database().get_engin()) as session:
+
+        # Adding stromzaehler readings to local database
         statement = select(StromzaehlerReading).where(StromzaehlerReading.stromzaehler == stromzaehler).order_by(StromzaehlerReading.timestamp.desc()).limit(1)
         last_reading = session.scalar(statement)
+        previous_value = last_reading.value if last_reading is not None else 0
         readings = []
         for reading in data['readings']:
             if last_reading is not None and reading['id'] <= last_reading.source_id:
                 continue
+            # Create alert if current value is smaller than previous value
+            if previous_value > reading['value']:
+                alert = Alert(
+                    message=f'Stromzaehler provided a smaller value than before!',
+                    stromzaehler=stromzaehler,
+                    timestamp=get_current_milliseconds()
+                )
+                session.add(alert)
+            previous_value = reading['value']
+
             readings.append(StromzaehlerReading(
                 stromzaehler=stromzaehler,
                 source_id=reading['id'],
@@ -37,6 +49,7 @@ def stromzaehler_update(stromzaehler):
             ))
         session.add_all(readings)
 
+        # Adding stromzaehler logs to local database
         statement = select(StromzaehlerLog).where(StromzaehlerLog.stromzaehler == stromzaehler).order_by(StromzaehlerLog.timestamp.desc()).limit(1)
         last_log = session.scalar(statement)
         logs = []
@@ -50,6 +63,20 @@ def stromzaehler_update(stromzaehler):
                 message=log['message']
             ))
         session.add_all(logs)
+
+        # Creating alert if stromzaehler collected to little stromzaehler in time period
+        statement = select(StromzaehlerReading).where(StromzaehlerReading.stromzaehler == stromzaehler).order_by(StromzaehlerReading.timestamp.asc())
+        response = session.scalars(statement)
+        readings = response.fetchall()
+        first_timestamp = readings[0].timestamp
+        last_timestamp = readings[len(readings)-1].timestamp
+        if ((last_timestamp - first_timestamp) // Variables.get_cronjob_interval()) >= len(readings):
+            alert = Alert(
+                    message=f'Stromzaehler collected to little readings!',
+                    stromzaehler=stromzaehler,
+                    timestamp=get_current_milliseconds()
+                )
+            session.add(alert)
 
         session.commit()
     return signing_response({'success': True})

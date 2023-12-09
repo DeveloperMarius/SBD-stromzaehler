@@ -7,8 +7,8 @@ from time import sleep
 import hashlib
 from cryptography.hazmat.primitives import serialization
 import jwt
-from models import Stromzaehler
-from sqlalchemy import select
+from models import Stromzaehler, StromzaehlerReading, Alert
+from sqlalchemy import select, delete
 from sqlalchemy.orm import Session
 from utils import Variables, get_current_milliseconds
 import json
@@ -253,6 +253,153 @@ class AppTest(unittest.TestCase):
 
         self.assertEqual(history3_response.status_code, 200)
         self.assertEqual(history3_response.json()['readings'], [readings[1]])
+
+    def test_alert_on_to_little_readings(self):
+        # Deleting database entries in StromzaehlerReadings and Alerts
+        with Session(Variables.get_database().get_engin()) as session:
+            table = Alert.__table__
+            delete_statement = delete(table)
+            session.execute(delete_statement)
+            table = StromzaehlerReading.__table__
+            delete_statement = delete(table)
+            session.execute(delete_statement)
+            session.commit()
+
+        with Session(Variables.get_database().get_engin()) as session:
+            # sending reading
+            timestamp = 1702380120000
+            readings = [
+                {
+                    "id": 1,
+                    "timestamp": timestamp,
+                    "value": 10
+                },
+            ]
+            update_body = json.dumps({
+                "readings": readings,
+                "logs": []
+            })
+            update_response = requests.post('http://localhost:5000/api/stromzaehler/update',
+                                            headers={"Authorization": AppTest.generate_stromzaehler_jwt(update_body),
+                                                     'Content-Type': 'application/json'},
+                                            data=update_body)
+            self.assertEqual(update_response.status_code, 200)
+
+            # Getting alerts
+            statement = select(Alert)
+            response = session.scalars(statement)
+            alerts = response.fetchall()
+            self.assertEqual(len(alerts), 0)
+
+            # Testing insert correct reading
+            readings = [
+                {
+                    "id": 2,
+                    "timestamp": timestamp + Variables.get_cronjob_interval(),
+                    "value": 11
+                }
+            ]
+            update_body = json.dumps({
+                "readings": readings,
+                "logs": []
+            })
+            update_response = requests.post('http://localhost:5000/api/stromzaehler/update',
+                                            headers={"Authorization": AppTest.generate_stromzaehler_jwt(update_body),
+                                                     'Content-Type': 'application/json'},
+                                            data=update_body)
+            self.assertEqual(update_response.status_code, 200)
+            # Getting alerts
+            statement = select(Alert)
+            response = session.scalars(statement)
+            alerts = response.fetchall()
+            self.assertEqual(len(alerts), 0)
+
+            # Testing insert false reading
+            readings = [
+                {
+                    "id": 3,
+                    "timestamp": timestamp + (3 * Variables.get_cronjob_interval()),
+                    "value": 11
+                }
+            ]
+            update_body = json.dumps({
+                "readings": readings,
+                "logs": []
+            })
+            update_response = requests.post('http://localhost:5000/api/stromzaehler/update',
+                                            headers={"Authorization": AppTest.generate_stromzaehler_jwt(update_body),
+                                                     'Content-Type': 'application/json'},
+                                            data=update_body)
+            self.assertEqual(update_response.status_code, 200)
+            # Getting alerts
+            statement = select(Alert)
+            response = session.scalars(statement)
+            alerts = response.fetchall()
+            self.assertEqual(len(alerts), 1)
+            self.assertEqual(alerts[0].stromzaehler, 1)
+            self.assertEqual(alerts[0].message, 'Stromzaehler collected to little readings!')
+
+    def test_alert_on_lower_value(self):
+        # Deleting database entries in StromzaehlerReadings and Alerts
+        with Session(Variables.get_database().get_engin()) as session:
+            table = Alert.__table__
+            delete_statement = delete(table)
+            session.execute(delete_statement)
+            table = StromzaehlerReading.__table__
+            delete_statement = delete(table)
+            session.execute(delete_statement)
+            session.commit()
+
+        with Session(Variables.get_database().get_engin()) as session:
+            # sending reading
+            timestamp = 1702380120000
+            readings = [
+                {
+                    "id": 1,
+                    "timestamp": timestamp,
+                    "value": 10
+                },
+            ]
+            update_body = json.dumps({
+                "readings": readings,
+                "logs": []
+            })
+            update_response = requests.post('http://localhost:5000/api/stromzaehler/update',
+                                            headers={"Authorization": AppTest.generate_stromzaehler_jwt(update_body),
+                                                     'Content-Type': 'application/json'},
+                                            data=update_body)
+            self.assertEqual(update_response.status_code, 200)
+            # Getting alerts
+            statement = select(Alert)
+            response = session.scalars(statement)
+            alerts = response.fetchall()
+            self.assertEqual(len(alerts), 0)
+
+            # sending reading
+            timestamp = 1702380120000
+            readings = [
+                {
+                    "id": 2,
+                    "timestamp": timestamp + Variables.get_cronjob_interval(),
+                    "value": 9
+                },
+            ]
+            update_body = json.dumps({
+                "readings": readings,
+                "logs": []
+            })
+            update_response = requests.post('http://localhost:5000/api/stromzaehler/update',
+                                            headers={"Authorization": AppTest.generate_stromzaehler_jwt(update_body),
+                                                     'Content-Type': 'application/json'},
+                                            data=update_body)
+            self.assertEqual(update_response.status_code, 200)
+            # Getting alerts
+            statement = select(Alert)
+            response = session.scalars(statement)
+            alerts = response.fetchall()
+            self.assertEqual(len(alerts), 1)
+            self.assertEqual(alerts[0].stromzaehler, 1)
+            self.assertEqual(alerts[0].message, 'Stromzaehler provided a smaller value than before!')
 
 
 if __name__ == '__main__':

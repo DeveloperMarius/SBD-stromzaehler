@@ -10,8 +10,6 @@ from cryptography.hazmat.primitives import serialization
 from flask import jsonify
 import json
 import hashlib
-import sys
-import traceback
 
 
 def get_current_milliseconds():
@@ -33,6 +31,10 @@ class Variables:
         if Variables.db_instance is None:
             Variables.db_instance = Database()
         return Variables.db_instance
+
+    @staticmethod
+    def get_cronjob_interval() -> int:
+        return 60000
 
 
 class Database:

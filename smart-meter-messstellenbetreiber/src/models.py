@@ -144,3 +144,15 @@ class Setting(Base):
 
     def __repr__(self) -> str:
         return f"Setting(id={self.key!r})"
+
+
+class Alert(Base):
+    __tablename__ = "alerts"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    stromzaehler: Mapped[int] = mapped_column(Integer(), ForeignKey("stromzaehler.id"))
+    message: Mapped[str] = mapped_column(String(3000))
+    timestamp: Mapped[int] = mapped_column(BigInteger())
+
+    def __repr__(self) -> str:
+        return f"Alert(id={self.id!r})"
