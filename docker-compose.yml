@@ -47,6 +47,8 @@ services:
       - 5432:5432
     networks:
       - kundenportal
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data
   kundenportal:
     build:
       context: ./smart-meter-kundenportal

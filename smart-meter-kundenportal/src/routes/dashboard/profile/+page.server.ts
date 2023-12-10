@@ -5,6 +5,7 @@ import { redirect, type Actions, type ServerLoad, fail } from '@sveltejs/kit';
 import { z } from 'zod';
 import type { Prisma } from '@prisma/client';
 import argon2 from 'argon2';
+import { env } from '$env/dynamic/private';
 
 export const load: ServerLoad = async (event) => {
 	const auth = auth_guard(event) as AuthGuardOutput;
