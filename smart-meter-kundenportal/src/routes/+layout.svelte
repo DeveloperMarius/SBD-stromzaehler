@@ -8,7 +8,9 @@
 
 <Toaster />
 
-<slot><!-- optional fallback --></slot>
+<div data-sveltekit-preload-data="false" data-sveltekit-preload-code="false">
+	<slot><!-- optional fallback --></slot>
+</div>
 
 <style lang="postcss">
 	:global(body) {
