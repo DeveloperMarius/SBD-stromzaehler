@@ -53,7 +53,7 @@ class Stromzaehler:
         response = requests.post(os.getenv('MESSSTELLENBETREIBER_URL') + '/api/stromzaehler/update', headers={'Authorization': jwt_token, 'Content-Type': 'application/json'}, data=body)
 
         if response.status_code != 200:
-            print(os.getenv('MESSSTELLENBETREIBER_URL'))
+            print(response)
             Variables.get_logger().log('Server not available.')
             return
 
