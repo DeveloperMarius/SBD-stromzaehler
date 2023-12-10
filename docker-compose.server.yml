@@ -65,8 +65,6 @@ services:
       - traefik
     environment:
       - DATABASE_URL=postgres://postgres:postgres@database:5432/postgres
-      - HOST=smartstrom24.top
-      - PORT=443
       - ORIGIN=https://smartstrom24.top
     extra_hosts:
       - "localhost:host-gateway" # Access localhost "internet"
