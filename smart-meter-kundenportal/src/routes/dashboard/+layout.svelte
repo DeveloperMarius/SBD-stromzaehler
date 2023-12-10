@@ -24,7 +24,7 @@
 			<SidebarGroup class="mb-4">
 				<div class="flex items-center">
 					<img class="w-12" src="/logo_house.png" alt="Logo" />
-					<h3 class="font-serif font-bold ml-2">SmartStrom24.jetzt</h3>
+					<h3 class="font-serif font-bold ml-2">SmartStrom24.top</h3>
 				</div>
 			</SidebarGroup>
 

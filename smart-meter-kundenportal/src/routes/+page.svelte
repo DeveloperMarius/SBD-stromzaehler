@@ -264,7 +264,7 @@
 						</h5>
 					</a>
 					<p class="mb-3 font-normal text-gray-500 dark:text-gray-400 text-center">
-						info@smartstrom24.jetzt
+						info@smartstrom24.top
 					</p>
 				</Card>
 				<Card class="bg-opacity-0 backdrop-blur-md w-72">
@@ -287,7 +287,7 @@
 	<Footer footerType="socialmedia" class="bg-primary-600 bg-opacity-50 backdrop-blur-md">
 		<div class="mx-auto max-w-screen-xl text-center">
 			<FooterBrand
-				href="smartstrom24.de"
+				href="smartstrom24.top"
 				src="/blitz.png"
 				alt="Unser Logo"
 				name="SmartStrom24"
