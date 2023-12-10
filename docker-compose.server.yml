@@ -86,6 +86,9 @@ services:
       - kundenportal_db:database
     environment:
       - DATABASE_URL=postgres://postgres:postgres@database:5432/postgres
+      - HOST=smartstrom24.top
+      - PORT=443
+      - ORIGIN=https://smartstrom24.top
     command: pnpm prisma db push
 
 networks:
