@@ -1,15 +1,16 @@
 import type { PowermeterReading, Reading } from '$lib/reading';
 import type { Contract, Powermeter, User } from '@prisma/client';
 import prisma from '$lib/prisma';
-import { sign_body } from './jwt';
-import { fail } from '@sveltejs/kit';
+import { sign_body } from './jwt.server';
+import { error } from '@sveltejs/kit';
+import { env } from '$env/dynamic/private';
 
 export async function register_powermeter(
 	powermeter_id: string,
 	contract_id: string,
 	user: User
 ): Promise<boolean> {
-	if (!process.env.SECRET_PRIVATE_KEY || !user) {
+	if (!env.SECRET_PRIVATE_KEY || !user) {
 		return false;
 	}
 
@@ -120,9 +121,7 @@ export async function getPowermeterReadings(
 				!powermeter.registered &&
 				!(await register_powermeter(powermeter.id, contract.id, user))
 			) {
-				throw fail(500, {
-					error: 'Server Fehler: Die Stromzählerdaten konnten nicht abgefragt werden.'
-				});
+				throw error(500, 'Server Fehler: Der Stromzähler konnte nicht registriert werden.');
 			}
 
 			const body = JSON.stringify({

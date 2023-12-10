@@ -1,9 +1,10 @@
-import { auth_guard, type AuthGuardOutput, get_user_from_token } from '$lib/auth';
+import { auth_guard, type AuthGuardOutput, get_user_from_token } from '$lib/auth.server';
 import prisma from '$lib/prisma';
 import { redirect, type Actions, type ServerLoad, fail } from '@sveltejs/kit';
 import z from 'zod';
 import dayjs from 'dayjs';
-import { register_powermeter } from '$lib/powermeter';
+import { register_powermeter } from '$lib/powermeter.server';
+import { env } from '$env/dynamic/private';
 
 export const load: ServerLoad = async (event) => {
 	const auth = auth_guard(event) as AuthGuardOutput;
@@ -72,7 +73,7 @@ export const actions: Actions = {
 			});
 		}
 
-		if (!process.env.SECRET_PRIVATE_KEY) {
+		if (!env.SECRET_PRIVATE_KEY) {
 			return fail(500, {
 				error: 'Server Fehler: Bitte versuchen Sie es später erneut.'
 			});

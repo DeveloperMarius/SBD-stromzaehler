@@ -1,24 +1,23 @@
 import prisma from '$lib/prisma';
 import type { Prisma } from '@prisma/client';
-import { fail, type Actions, redirect } from '@sveltejs/kit';
+import { fail, type Actions } from '@sveltejs/kit';
 import type { ServerLoad } from '@sveltejs/kit';
 import jwt from 'jsonwebtoken';
 import z from 'zod';
-import bcrypt from 'bcrypt';
+import argon2 from 'argon2';
+import { env } from '$env/dynamic/private';
 
 export const load: ServerLoad = async ({ cookies }) => {
 	const token = cookies.get('token');
+	let loggedIn = false;
 
-	try {
-		if (token && process.env.JWT_SECRET && jwt.verify(token, process.env.JWT_SECRET)) {
-			throw redirect(302, `/dashboard`);
-		}
-	} catch (error) {
-		console.error(error);
+	if (token && env.JWT_SECRET && jwt.verify(token, env.JWT_SECRET)) {
+		loggedIn = true;
 	}
 
 	return {
-		status: 200
+		status: 200,
+		loggedIn: loggedIn
 	};
 };
 
@@ -34,7 +33,7 @@ export const actions: Actions = {
 			.safeParse(Object.fromEntries(formData));
 
 		if (!formUser.success)
-			return fail(400, {
+			return fail(422, {
 				error: 'Bitte überprüfe deine Eingaben.'
 			});
 
@@ -44,29 +43,35 @@ export const actions: Actions = {
 			}
 		});
 
-		if (!user || !(await bcrypt.compare(formUser.data.password, user.password))) {
-			return fail(400, {
-				error: 'Anmeldung fehlgeschlagen, bitte überprüfe deine Eingaben.'
+		if (!user) {
+			return fail(422, {
+				error: 'Anmeldung fehlgeschlagen, Nutzername oder Passwort falsch.'
+			});
+		}
+
+		try {
+			!argon2.verify(user.password, formUser.data.password);
+		} catch (error) {
+			return fail(422, {
+				error: 'Anmeldung fehlgeschlagen, Nutzername oder Passwort falsch.'
 			});
 		}
 
 		type UserWithourPassword = Omit<Prisma.UserCreateInput, 'password'>;
 		const jwtData: UserWithourPassword = user as UserWithourPassword;
 
-		if (!process.env.JWT_SECRET || !jwtData) {
+		if (!env.JWT_SECRET || !jwtData) {
 			return fail(500, {
 				error: 'Server Fehler: Anmeldevorgang fehlgeschlagen.'
 			});
 		}
 
-		const token = jwt.sign(jwtData, process.env.JWT_SECRET, { expiresIn: '12h' });
+		const token = jwt.sign(jwtData, env.JWT_SECRET, { expiresIn: '12h' });
 
 		cookies.set('token', token, {
 			path: '/',
 			maxAge: 60 * 60 * 12,
 			sameSite: 'lax'
 		});
-
-		throw redirect(302, `/dashboard`);
 	}
 };

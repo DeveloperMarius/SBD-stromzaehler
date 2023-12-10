@@ -1,13 +1,14 @@
 import * as jose from 'jose';
 import { createPrivateKey } from 'node:crypto';
 import * as crypto from 'crypto';
+import { env } from '$env/dynamic/private';
 
 export async function sign_body(body: string) {
-	if (!process.env.SECRET_PRIVATE_KEY) {
+	if (!env.SECRET_PRIVATE_KEY) {
 		throw new Error('No private key found');
 	}
 
-	const private_key = process.env.SECRET_PRIVATE_KEY;
+	const private_key = env.SECRET_PRIVATE_KEY;
 
 	const secret = createPrivateKey(private_key);
 

@@ -1,4 +1,4 @@
-import { auth_guard, type AuthGuardOutput } from '$lib/auth';
+import { auth_guard, type AuthGuardOutput } from '$lib/auth.server';
 import prisma from '$lib/prisma';
 import { redirect, type ServerLoad } from '@sveltejs/kit';
 

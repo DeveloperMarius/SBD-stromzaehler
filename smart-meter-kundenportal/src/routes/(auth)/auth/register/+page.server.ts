@@ -1,24 +1,23 @@
 import prisma from '$lib/prisma';
 import type { Prisma } from '@prisma/client';
-import { fail, type Actions, redirect } from '@sveltejs/kit';
+import { fail, type Actions } from '@sveltejs/kit';
 import type { ServerLoad } from '@sveltejs/kit';
 import jwt from 'jsonwebtoken';
 import z from 'zod';
-import bcrypt from 'bcrypt';
+import argon2 from 'argon2';
+import { env } from '$env/dynamic/private';
 
 export const load: ServerLoad = async ({ cookies }) => {
 	const token = cookies.get('token');
+	let loggedIn = false;
 
-	try {
-		if (token && process.env.JWT_SECRET && jwt.verify(token, process.env.JWT_SECRET)) {
-			throw redirect(302, `/dashboard`);
-		}
-	} catch (error) {
-		console.error(error);
+	if (token && env.JWT_SECRET && jwt.verify(token, env.JWT_SECRET)) {
+		loggedIn = true;
 	}
 
 	return {
-		status: 200
+		status: 200,
+		loggedIn: loggedIn
 	};
 };
 
@@ -27,7 +26,7 @@ export const actions: Actions = {
 		const formData = await request.formData();
 
 		if (formData.get('password') !== formData.get('confirm-password'))
-			return fail(400, {
+			return fail(422, {
 				error: 'Dein Account konnte nicht angelegt werden, die Passwörter stimmen nicht überein.'
 			});
 
@@ -58,40 +57,38 @@ export const actions: Actions = {
 			});
 
 		if (!form.success)
-			return fail(400, {
-				error: 'Dein Account konnte nicht angelegt werden, bitte überprüfe deine Eingaben.'
+			return fail(422, {
+				error: 'Dein Account konnte nicht angelegt werden: Bitte überprüfe deine Eingaben.'
 			});
 
 		user = form.data;
 
-		user.password = await bcrypt.hash(user.password, 10);
+		user.password = await argon2.hash(user.password);
 
 		user = await prisma.user.create({
 			data: user
 		});
 
 		if (!user)
-			return fail(400, {
-				error: 'Dein Account konnte nicht angelegt werden, bitte überprüfe deine Eingaben.'
+			return fail(500, {
+				error: 'Dein Account konnte nicht angelegt werden: Fehler mit der Datenbank.'
 			});
 
 		type UserWithourPassword = Omit<Prisma.UserCreateInput, 'password'>;
 		const jwtData: UserWithourPassword = user as UserWithourPassword;
 
-		if (!process.env.JWT_SECRET || !jwtData) {
+		if (!env.JWT_SECRET || !jwtData) {
 			return fail(500, {
 				error: 'Server Fehler: Der Account wurde erfolgreich angelegt. Bitte melde dich manuell an.'
 			});
 		}
 
-		const token = jwt.sign(jwtData, process.env.JWT_SECRET, { expiresIn: '12h' });
+		const token = jwt.sign(jwtData, env.JWT_SECRET, { expiresIn: '12h' });
 
 		cookies.set('token', token, {
 			path: '/',
 			maxAge: 60 * 60 * 12,
 			sameSite: 'lax'
 		});
-
-		throw redirect(302, `/dashboard`);
 	}
 };

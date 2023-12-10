@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken';
-import { auth_guard, type AuthGuardOutput } from '$lib/auth';
+import { auth_guard, type AuthGuardOutput } from '$lib/auth.server';
 import prisma from '$lib/prisma';
 import { redirect, type Actions, type ServerLoad, fail } from '@sveltejs/kit';
 import { z } from 'zod';
 import type { Prisma } from '@prisma/client';
-import bcrypt from 'bcrypt';
+import argon2 from 'argon2';
 
 export const load: ServerLoad = async (event) => {
 	const auth = auth_guard(event) as AuthGuardOutput;
@@ -51,13 +51,13 @@ export const actions: Actions = {
 
 		let user;
 		const token = cookies.get('token');
-		if (!token || !process.env.JWT_SECRET) {
+		if (!token || !env.JWT_SECRET) {
 			return fail(400, {
 				error: 'Deine Accountdaten wurden nicht aktualisiert.'
 			});
 		}
 		try {
-			user = jwt.verify(token, process.env.JWT_SECRET) as Prisma.UserCreateInput;
+			user = jwt.verify(token, env.JWT_SECRET) as Prisma.UserCreateInput;
 		} catch (error) {
 			console.error(error);
 		}
@@ -90,7 +90,7 @@ export const actions: Actions = {
 		}
 
 		try {
-			const newToken = jwt.sign(updatedUser, process.env.JWT_SECRET);
+			const newToken = jwt.sign(updatedUser, env.JWT_SECRET);
 			cookies.set('token', newToken);
 		} catch (error) {
 			console.error(error);
@@ -115,17 +115,17 @@ export const actions: Actions = {
 				error: 'Deine Accountdaten wurden nicht aktualisiert.'
 			});
 
-		const newPassword = await bcrypt.hash(password.data.password, 10);
+		const newPassword = await argon2.hash(password.data.password);
 
 		let user;
 		const token = cookies.get('token');
-		if (!token || !process.env.JWT_SECRET) {
+		if (!token || !env.JWT_SECRET) {
 			return fail(400, {
 				error: 'Deine Accountdaten wurden nicht aktualisiert.'
 			});
 		}
 		try {
-			user = jwt.verify(token, process.env.JWT_SECRET) as Prisma.UserCreateInput;
+			user = jwt.verify(token, env.JWT_SECRET) as Prisma.UserCreateInput;
 		} catch (error) {
 			console.error(error);
 		}

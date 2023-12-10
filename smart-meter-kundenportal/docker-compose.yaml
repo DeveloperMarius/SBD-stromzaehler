@@ -7,25 +7,38 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=postgres
-    expose:
+    ports:
       - 5432:5432
     networks:
       - kundenportal
   kundenportal:
     build: .
-    expose:
-      - 3000
+    ports:
+      - 3001:3001
     depends_on:
+      - db
+    links:
+      - db:database
+    networks:
+      - kundenportal
+      - internet
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@database:5432/postgres
+  prisma_to_db:
+    build: .
+    depends_on:
+      - kundenportal
       - db
     networks:
       - kundenportal
-    labels:
-      - traefik.enable=true
-      - traefik.entrypoints=websecure
-      - traefik.http.routers.homepage.rule=Host(`smartstrom24jetzt.hauschildt.dev`)
-      - traefik.http.routers.homepage.tls=true
-      - traefik.http.routers.homepage.tls.certresolver=letssl
+    links:
+      - db:database
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@database:5432/postgres
+    command: pnpm prisma db push
 
 networks:
   kundenportal:
     name: kundenportal
+  internet:
+    external: true
