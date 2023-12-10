@@ -1,0 +1,96 @@
+version: "3"
+services:
+  messstellenbetreiber1:
+    build: ./smart-meter-messstellenbetreiber
+    ports:
+      - "9001:5000"
+    expose:
+      - 9001
+    networks:
+      - internet
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  stromzaehler1:
+    build: ./smart-meter-stromzaehler
+    volumes:
+      - ./smart-meter-stromzaehler/generated/.env-1:/python-docker/res/.env
+      - ./smart-meter-stromzaehler/generated/database-1.db:/python-docker/res/database.db
+    #  - 5001-5010:5000
+    #deploy:
+    #  replicas: 10
+    networks:
+      - internet
+    depends_on:
+      - messstellenbetreiber1
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  stromzaehler2:
+    build: ./smart-meter-stromzaehler
+    volumes:
+      - ./smart-meter-stromzaehler/generated/.env-2:/python-docker/res/.env
+      - ./smart-meter-stromzaehler/generated/database-2.db:/python-docker/res/database.db
+    networks:
+      - internet
+    depends_on:
+      - messstellenbetreiber1
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Kundenportal
+  kundenportal_db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    expose:
+      - 5432:5432
+    networks:
+      - kundenportal
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data
+  kundenportal:
+    build:
+      context: ./smart-meter-kundenportal
+      dockerfile: Dockerfile
+    ports:
+      - 3001:3001
+    depends_on:
+      - kundenportal_db
+    links:
+      - kundenportal_db:database
+    networks:
+      - kundenportal
+      - internet
+      - traefik
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@database:5432/postgres
+    extra_hosts:
+      - "localhost:host-gateway" # Access localhost "internet"
+    labels:
+      - traefik.enable=true
+      - traefik.entrypoints=websecure
+      - traefik.http.routers.kp.rule=Host(`smartstrom24.top`)
+      - traefik.http.routers.kp.tls=true
+      - traefik.http.routers.kp.tls.certresolver=letssl
+  prisma_to_db:
+    build:
+      context: ./smart-meter-kundenportal
+      dockerfile: Dockerfile
+    depends_on:
+      - kundenportal
+      - kundenportal_db
+    networks:
+      - kundenportal
+    links:
+      - kundenportal_db:database
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@database:5432/postgres
+    command: pnpm prisma db push
+
+networks:
+  internet:
+  kundenportal:
+  traefik:
+    external: true
+# https://stackoverflow.com/questions/56203272/docker-compose-scaling-with-unique-environment-variable
