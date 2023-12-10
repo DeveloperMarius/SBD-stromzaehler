@@ -36,7 +36,7 @@
 		</NavBrand>
 		<div class="flex md:order-2">
 			<a href="/auth/register">
-				<Button size="sm">Anmelden</Button>
+				<Button size="sm">Registrieren</Button>
 			</a>
 			<NavHamburger />
 		</div>

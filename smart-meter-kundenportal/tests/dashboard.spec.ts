@@ -5,7 +5,7 @@ let test_pw = '12345678';
 
 test.beforeAll(async ({ page }) => {
 	await page.goto('http://localhost:3001/');
-	await page.getByRole('button', { name: 'Anmelden' }).click();
+	await page.getByRole('button', { name: 'Registrieren' }).click();
 
 	await page.waitForURL('http://localhost:3001/auth/register');
 	await page.getByLabel('Vorname').fill('Test');
