@@ -71,14 +71,15 @@ class Stromzaehler:
             return
 
         if jwt_body['mode'] is None or jwt_body['mode'] != 'SHA256' or jwt_body['signature'] is None:
-            return False
+            Variables.get_logger().log('Signature or Mode not set.')
+            return
 
         actual_hash = hashlib.sha256(json.dumps(response.json()).encode('utf-8')).hexdigest()
         if actual_hash != jwt_body['signature']:
             Variables.get_logger().log('Signature is invalid.')
             return
 
-        Variables.get_database().cursor.execute('DELETE FROM readings ORDER BY timestamp DESC LIMIT -1 OFFSET 1')
+        Variables.get_database().cursor.execute('DELETE FROM readings ORDER BY timestamp LIMIT (SELECT COUNT(*) FROM readings)-1;')
         Variables.get_database().cursor.execute('DELETE FROM logs')
         Variables.get_logger().log('Data successfully sent to server.')
 

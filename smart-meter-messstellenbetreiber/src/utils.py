@@ -2,16 +2,15 @@ import logging
 import jwt
 import os
 import time
-from models import Stromzaehler, Log, Kundenportal
+from models import Stromzaehler, Log, Kundenportal, StromzaehlerReading, StromzaehlerLog
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 from sqlalchemy import select
 from cryptography.hazmat.primitives import serialization
 from flask import jsonify
+from sqlalchemy import delete
 import json
 import hashlib
-import sys
-import traceback
 
 
 def get_current_milliseconds():
@@ -34,6 +33,10 @@ class Variables:
             Variables.db_instance = Database()
         return Variables.db_instance
 
+    @staticmethod
+    def get_cronjob_interval() -> int:
+        return 60000
+
 
 class Database:
 
@@ -42,6 +45,16 @@ class Database:
 
     def get_engin(self):
         return self.engine
+
+    def clear_database(self):
+        with Session(self.get_engin()) as session:
+            statement = delete(Log)
+            session.execute(statement)
+            statement = delete(StromzaehlerReading)
+            session.execute(statement)
+            statement = delete(StromzaehlerLog)
+            session.execute(statement)
+            session.commit()
 
 
 class Logger:

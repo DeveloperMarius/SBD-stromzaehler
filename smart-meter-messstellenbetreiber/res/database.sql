@@ -66,3 +66,12 @@ CREATE TABLE IF NOT EXISTS 'settings' (
     'key' VARCHAR(200) NOT NULL,
     'value' VARCHAR(200) NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS 'alerts' (
+    'id' INTEGER NOT NULL PRIMARY KEY,
+    'stromzaehler' INTEGER NOT NULL,
+    'message' TEXT,
+    'timestamp' BIGINT NOT NULL,
+    Foreign Key ('stromzaehler') REFERENCES stromzaehler ('id') ON DELETE CASCADE
+
+);
