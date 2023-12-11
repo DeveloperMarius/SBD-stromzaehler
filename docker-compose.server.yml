@@ -3,9 +3,9 @@ services:
   messstellenbetreiber1:
     build: ./smart-meter-messstellenbetreiber
     ports:
-      - 9001:5000
+      - "9001:5000"
     expose:
-      - 5000:5000
+      - 5000
     networks:
       - internet
   stromzaehler1:
@@ -13,21 +13,17 @@ services:
     volumes:
       - ./smart-meter-stromzaehler/generated/.env-1:/python-docker/res/.env
       - ./smart-meter-stromzaehler/generated/database-1.db:/python-docker/res/database.db
-    environment:
-      - MESSSTELLENBETREIBER_URL=http://msb:5000
     networks:
       - internet
-    links:
-      - messstellenbetreiber1:msb
     depends_on:
       - messstellenbetreiber1
+    links:
+      - messstellenbetreiber1:msb
   stromzaehler2:
     build: ./smart-meter-stromzaehler
     volumes:
       - ./smart-meter-stromzaehler/generated/.env-2:/python-docker/res/.env
       - ./smart-meter-stromzaehler/generated/database-2.db:/python-docker/res/database.db
-    environment:
-      - MESSSTELLENBETREIBER_URL=http://msb:5000
     networks:
       - internet
     depends_on:
