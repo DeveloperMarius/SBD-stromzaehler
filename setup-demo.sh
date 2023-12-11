@@ -20,7 +20,7 @@ KUNDENPORTAL_ID=1
 SECRET_PUBLIC_KEY=$public_key
 SECRET_PRIVATE_KEY=$private_key
 EOT
-sqlite3 smart-meter-messstellenbetreiber/res/database.db "INSERT INTO kundenportale VALUES (1, 'http://host.docker.internal:9001', '$public_key')"
+sqlite3 smart-meter-messstellenbetreiber/res/database.db "INSERT INTO kundenportale VALUES (1, 'http://msb:5000', '$public_key')"
 
 # Messstellenbetreiber
 rm -rf /tmp/key-*
@@ -46,7 +46,7 @@ create_stromzaehler() {
   private_key=$(sed ':a;N;$!ba;s/\n/\\n/g' /tmp/key-private.pem)
   rm -rf /tmp/key-*
   cat > ./smart-meter-stromzaehler/generated/.env-$stromzaehler_id <<EOT
-MESSSTELLENBETREIBER_URL=http://host.docker.internal:9001
+MESSSTELLENBETREIBER_URL=http://msb:5000
 MESSSTELLENBETREIBER_PUBLIC_KEY=$messstellenbetreiber_public_key
 STROMZAEHLER_ID=$stromzaehler_id
 PUBLIC_KEY=$public_key

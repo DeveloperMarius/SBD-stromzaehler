@@ -1,5 +1,4 @@
 import * as jose from 'jose';
-import { createPrivateKey } from 'node:crypto';
 import * as crypto from 'crypto';
 import { env } from '$env/dynamic/private';
 
@@ -9,8 +8,12 @@ export async function sign_body(body: string) {
 	}
 
 	const private_key = env.SECRET_PRIVATE_KEY;
-
-	const secret = createPrivateKey(private_key);
+	let secret;
+	try {
+		secret = await jose.importPKCS8(private_key.replaceAll(/\\n/g, '\n'), 'EdDSA');
+	} catch (error) {
+		throw new Error('Invalid private key');
+	}
 
 	const jwt_body = {
 		type: 'kundenportal',
