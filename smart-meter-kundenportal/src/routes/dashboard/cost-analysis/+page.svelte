@@ -43,9 +43,13 @@
 	}
 
 	function getLowestReading(powermeterReadings: Reading[]) {
-		let lowestReading = 0;
+		let lowestReading = -1;
 
 		powermeterReadings.forEach((powermeterReading) => {
+			if (lowestReading == -1) {
+				lowestReading = powermeterReading.value;
+			}
+
 			if (powermeterReading.value < lowestReading) {
 				lowestReading = powermeterReading.value;
 			}
