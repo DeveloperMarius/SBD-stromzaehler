@@ -53,13 +53,13 @@ services:
       - kundenportal_db
     links:
       - kundenportal_db:database
+      - messstellenbetreiber1
     networks:
       - kundenportal
       - internet
     environment:
       - DATABASE_URL=postgres://postgres:postgres@database:5432/postgres
-    extra_hosts:
-      - "localhost:host-gateway" # Access localhost "internet"
+      - MESSSTELLENBETREIBER_URL=http://messstellenbetreiber1:5000
   prisma_to_db:
     build:
       context: ./smart-meter-kundenportal

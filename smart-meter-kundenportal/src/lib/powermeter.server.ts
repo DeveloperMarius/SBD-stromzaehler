@@ -10,7 +10,7 @@ export async function register_powermeter(
 	contract_id: string,
 	user: User
 ): Promise<boolean> {
-	if (!env.SECRET_PRIVATE_KEY || !user) {
+	if (!env.SECRET_PRIVATE_KEY || !env.MESSSTELLENBETREIBER_URL || !user) {
 		return false;
 	}
 
@@ -32,7 +32,7 @@ export async function register_powermeter(
 		}
 	});
 
-	const response = await fetch('http://localhost:9001/api/stromzaehler/register', {
+	const response = await fetch(`${env.MESSSTELLENBETREIBER_URL}/api/stromzaehler/register`, {
 		method: 'POST',
 		headers: {
 			Authorization: 'Bearer ' + (await sign_body(body)),
@@ -51,7 +51,7 @@ export async function register_powermeter(
 		end_date: '2024-12-10'
 	});
 
-	const readings_res = await fetch(`http://localhost:9001/api/stromzaehler/history`, {
+	const readings_res = await fetch(`${env.MESSSTELLENBETREIBER_URL}/api/stromzaehler/history`, {
 		method: 'POST',
 		headers: {
 			Authorization: 'Bearer ' + (await sign_body(body2)),
@@ -130,7 +130,7 @@ export async function getPowermeterReadings(
 				end_date: '2024-12-10'
 			});
 
-			const data = await fetch('http://localhost:9001/api/stromzaehler/history', {
+			const data = await fetch(`${env.MESSSTELLENBETREIBER_URL}/api/stromzaehler/history`, {
 				method: 'POST',
 				headers: {
 					Authorization: 'Bearer ' + (await sign_body(body)),
